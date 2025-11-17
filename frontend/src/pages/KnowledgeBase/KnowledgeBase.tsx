@@ -136,10 +136,6 @@ interface Document {
   // 任务进度信息
   progress?: number;  // 进度百分比 (0.0-1.0)
   progress_msg?: string;  // 进度描述信息
-  // 知识图谱构建状态
-  kg_status?: 'not_built' | 'building' | 'success' | 'failed';
-  kg_error_message?: string;
-  kg_built_time?: string;
 }
 
 /** 分片信息 */
@@ -194,7 +190,6 @@ const KnowledgeBase: React.FC = () => {
   const [docSearchText, setDocSearchText] = useState('');
   const [docStatusFilter, setDocStatusFilter] = useState<string>('all'); // 文档状态筛选
   const [docFileTypeFilter, setDocFileTypeFilter] = useState<string>('all'); // 文件类型筛选
-  const [docKgStatusFilter, setDocKgStatusFilter] = useState<string>('all'); // 知识图谱状态筛选
   
   // 模态框控制
   const [createKBModalVisible, setCreateKBModalVisible] = useState(false);
@@ -290,11 +285,6 @@ const KnowledgeBase: React.FC = () => {
   const [batchParseProgress, setBatchParseProgress] = useState({ completed: 0, total: 0, failed: 0 });
   const batchParseDocListRef = useRef<string[]>([]); // 记录批量解析的文档ID列表
   
-  // 批量创建知识图谱 - 独立跟踪系统
-  const [batchCreatingKG, setBatchCreatingKG] = useState(false);
-  const [kgCreationProgress, setKgCreationProgress] = useState({ completed: 0, total: 0, failed: 0 });
-  const batchKGDocListRef = useRef<string[]>([]); // 记录批量创建KG的文档ID列表
-  const kgPollIntervalRef = useRef<NodeJS.Timeout | null>(null); // 轮询定时器
   
   // ==================== 生命周期 ====================
   
@@ -306,9 +296,6 @@ const KnowledgeBase: React.FC = () => {
     return () => {
       if (pollingTimerRef.current) {
         clearTimeout(pollingTimerRef.current);
-      }
-      if (kgPollIntervalRef.current) {
-        clearInterval(kgPollIntervalRef.current);
       }
     };
   }, []);
@@ -1285,270 +1272,6 @@ const KnowledgeBase: React.FC = () => {
     });
   };
 
-  /** 创建总文档知识图谱 - 为知识库中所有未创建图谱的JSON文档创建知识图谱（不受分页限制） */
-  const handleCreateAllKnowledgeGraphs = async () => {
-    if (!selectedKB) {
-      message.error('未选择知识库');
-      return;
-    }
-    
-    // 确认对话框
-    Modal.confirm({
-      title: '创建总文档知识图谱',
-      content: (
-        <div>
-          <p>此操作将为知识库中<strong>所有未创建知识图谱</strong>的JSON文档创建知识图谱（不受当前分页限制）。</p>
-          <p style={{ color: '#1890ff', marginTop: 8 }}>
-            系统会自动筛选：
-          </p>
-          <ul style={{ fontSize: 12, color: '#666' }}>
-            <li>文件类型必须是 .json</li>
-            <li>图谱状态为"未构建"或"构建失败"</li>
-          </ul>
-          <p style={{ color: '#ff4d4f', marginTop: 8 }}>
-            注意：此操作将调用Neo4j创建知识图谱，任务将在后台执行。
-          </p>
-        </div>
-      ),
-      okText: '确定',
-      cancelText: '取消',
-      width: 600,
-      onOk: () => {
-        // 🎯 立即启动后台任务，不阻塞模态框关闭
-        (async () => {
-          // 初始化进度
-          setBatchCreatingKG(true);
-          setKgCreationProgress({ completed: 0, total: 0, failed: 0 });
-          
-          try {
-            message.info('正在提交批量任务到队列...');
-            
-            // 🆕 使用新的批量构建所有知识图谱API
-            const response = await authAxios.post('/api/knowledge-graph/batch-build-all', {
-              kb_id: selectedKB.id,
-            });
-            
-            const { batch_id, total_tasks } = response.data;
-            
-            if (total_tasks === 0) {
-              message.info('没有需要构建知识图谱的JSON文档');
-              setBatchCreatingKG(false);
-              return;
-            }
-            
-            message.success(`已成功提交 ${total_tasks} 个任务到队列，批次ID: ${batch_id.substring(0, 8)}...`);
-            
-            // 更新初始总数
-            setKgCreationProgress({ completed: 0, total: total_tasks, failed: 0 });
-            
-            // 清除旧的轮询定时器
-            if (kgPollIntervalRef.current) {
-              clearInterval(kgPollIntervalRef.current);
-            }
-            
-            // 开始轮询进度
-            kgPollIntervalRef.current = setInterval(async () => {
-              try {
-                const statusResponse = await authAxios.get(`/api/knowledge-graph/batch-status/${batch_id}`);
-                const { completed, failed, total_tasks: total, status } = statusResponse.data;
-                
-                // 更新进度（基于批量API的实际进度）
-                setKgCreationProgress({ completed, total, failed });
-                
-                // 检查是否完成
-                if (status === 'completed' || status === 'partial_failed') {
-                  if (kgPollIntervalRef.current) {
-                    clearInterval(kgPollIntervalRef.current);
-                    kgPollIntervalRef.current = null;
-                  }
-                  setBatchCreatingKG(false);
-                  
-                  if (status === 'completed') {
-                    message.success(`🎉 批量任务完成！成功: ${completed}/${total}`);
-                  } else {
-                    message.warning(`⚠️ 批量任务完成，成功: ${completed}，失败: ${failed}，总计: ${total}`);
-                  }
-                  
-                  // 刷新文档列表
-                  if (selectedKB) {
-                    await loadDocuments(selectedKB.id, false, documentsPagination.current, documentsPagination.pageSize);
-                  }
-                }
-                
-              } catch (error: any) {
-                console.error('轮询进度失败:', error);
-                // 不终止轮询，继续尝试
-              }
-            }, 2000); // 每2秒轮询一次
-            
-            // 设置最大轮询时间（24小时）
-            setTimeout(() => {
-              if (kgPollIntervalRef.current) {
-                clearInterval(kgPollIntervalRef.current);
-                kgPollIntervalRef.current = null;
-                setBatchCreatingKG(false);
-                message.info('已停止进度轮询（超时），任务仍在后台执行');
-              }
-            }, 24 * 60 * 60 * 1000);
-            
-          } catch (error: any) {
-            console.error('批量提交知识图谱任务失败:', error);
-            setBatchCreatingKG(false);
-            message.error(error.response?.data?.detail || '批量提交失败');
-          }
-        })();
-        
-        // 🎯 不返回 Promise，模态框立即关闭
-      },
-    });
-  };
-  
-  /** 批量创建知识图谱 - 为所有筛选出来的JSON文件创建知识图谱 */
-  const handleBatchCreateKnowledgeGraph = async () => {
-    if (!selectedKB) {
-      message.error('未选择知识库');
-      return;
-    }
-    
-    // 获取所有筛选出来的JSON文件（不受分页限制）
-    // 只处理未构建(not_built)和失败(failed)的文档
-    const jsonDocs = documents.filter(doc => {
-      const matchesSearch = doc.filename.toLowerCase().includes(docSearchText.toLowerCase());
-      
-      let matchesStatus = true;
-      if (docStatusFilter === 'uploaded') {
-        matchesStatus = doc.status === 'uploaded';
-      } else if (docStatusFilter === 'completed') {
-        matchesStatus = doc.status === 'completed';
-      } else if (docStatusFilter === 'failed') {
-        matchesStatus = doc.status === 'failed';
-      }
-      
-      // 必须是.json文件
-      const fileExt = doc.filename.toLowerCase().split('.').pop() || '';
-      const isJsonFile = fileExt === 'json';
-      
-      // 知识图谱状态：只允许未构建(not_built)和失败(failed)的文档
-      const kgStatus = doc.kg_status || 'not_built';
-      const canBuildKG = kgStatus === 'not_built' || kgStatus === 'failed';
-      
-      return matchesSearch && matchesStatus && isJsonFile && canBuildKG;
-    });
-    
-    if (jsonDocs.length === 0) {
-      message.warning('没有符合条件的JSON文件');
-      return;
-    }
-    
-    // 确认对话框
-    Modal.confirm({
-      title: '批量创建知识图谱',
-      content: (
-        <div>
-          <p>确定要为以下 <strong>{jsonDocs.length}</strong> 个JSON文件创建知识图谱吗？</p>
-          <ul style={{ maxHeight: 200, overflowY: 'auto', fontSize: 12 }}>
-            {jsonDocs.slice(0, 10).map(doc => (
-              <li key={doc.id}>{doc.filename}</li>
-            ))}
-            {jsonDocs.length > 10 && <li>... 还有 {jsonDocs.length - 10} 个文件</li>}
-          </ul>
-          <p style={{ color: '#ff4d4f', marginTop: 8 }}>
-            注意：此操作将调用Neo4j创建知识图谱，任务将在后台执行。
-          </p>
-        </div>
-      ),
-      okText: '确定',
-      cancelText: '取消',
-      width: 600,
-      onOk: () => {
-        // 🎯 立即启动后台任务，不阻塞模态框关闭
-        (async () => {
-          // 记录批量创建KG的文档ID列表
-          const doc_ids = jsonDocs.map(doc => doc.id);
-          batchKGDocListRef.current = doc_ids;
-          
-          // 初始化进度
-          setBatchCreatingKG(true);
-          setKgCreationProgress({ completed: 0, total: doc_ids.length, failed: 0 });
-          
-          try {
-            message.info('正在提交批量任务到队列...');
-            
-            // 🆕 使用新的批量API（一次性提交所有任务）
-            const response = await authAxios.post('/api/knowledge-graph/batch-build', {
-              doc_ids: doc_ids,
-              kb_id: selectedKB.id,
-              clear_existing: false,
-            });
-            
-            const { batch_id, total_tasks } = response.data;
-            
-            message.success(`已成功提交 ${total_tasks} 个任务到队列，批次ID: ${batch_id.substring(0, 8)}...`);
-            
-            // 清除旧的轮询定时器
-            if (kgPollIntervalRef.current) {
-              clearInterval(kgPollIntervalRef.current);
-            }
-            
-            // 开始轮询进度
-            kgPollIntervalRef.current = setInterval(async () => {
-              try {
-                const statusResponse = await authAxios.get(`/api/knowledge-graph/batch-status/${batch_id}`);
-                const { completed, failed, total_tasks: total, status } = statusResponse.data;
-                
-                // 更新进度（基于批量API的实际进度）
-                setKgCreationProgress({ completed, total, failed });
-                
-                // 检查是否完成
-                if (status === 'completed' || status === 'partial_failed') {
-                  if (kgPollIntervalRef.current) {
-                    clearInterval(kgPollIntervalRef.current);
-                    kgPollIntervalRef.current = null;
-                  }
-                  setBatchCreatingKG(false);
-                  batchKGDocListRef.current = [];
-                  
-                  if (status === 'completed') {
-                    message.success(`🎉 批量任务完成！成功: ${completed}/${total}`);
-                  } else {
-                    message.warning(`⚠️ 批量任务完成，成功: ${completed}，失败: ${failed}，总计: ${total}`);
-                  }
-                  
-                  // 刷新文档列表
-                  if (selectedKB) {
-                    await loadDocuments(selectedKB.id, false, documentsPagination.current, documentsPagination.pageSize);
-                  }
-                }
-                
-              } catch (error: any) {
-                console.error('轮询进度失败:', error);
-                // 不终止轮询，继续尝试
-              }
-            }, 2000); // 每2秒轮询一次
-            
-            // 设置最大轮询时间（24小时）
-            setTimeout(() => {
-              if (kgPollIntervalRef.current) {
-                clearInterval(kgPollIntervalRef.current);
-                kgPollIntervalRef.current = null;
-                setBatchCreatingKG(false);
-                batchKGDocListRef.current = [];
-                message.info('已停止进度轮询（超时），任务仍在后台执行');
-              }
-            }, 24 * 60 * 60 * 1000);
-            
-          } catch (error: any) {
-            console.error('批量提交知识图谱任务失败:', error);
-            setBatchCreatingKG(false);
-            batchKGDocListRef.current = [];
-            message.error(error.response?.data?.detail || '批量提交失败');
-          }
-        })();
-        
-        // 🎯 不返回 Promise，模态框立即关闭
-      },
-    });
-  };
   
   /** 下载文档原文 */
   const handleDownloadDocument = async (docId: string, filename: string) => {
@@ -1736,34 +1459,6 @@ const KnowledgeBase: React.FC = () => {
     );
   };
   
-  /** 获取知识图谱构建状态标签 */
-  const getKgStatusTag = (kgStatus?: string, kgErrorMessage?: string) => {
-    const status = kgStatus || 'not_built';
-    const statusConfig: Record<string, { color: string; icon: React.ReactNode; text: string }> = {
-      not_built: { color: 'default', icon: <ClockCircleOutlined />, text: '未构建' },
-      building: { color: 'processing', icon: <SyncOutlined spin />, text: '构建中' },
-      success: { color: 'success', icon: <CheckCircleOutlined />, text: '已构建' },
-      failed: { color: 'error', icon: <ExclamationCircleOutlined />, text: '构建失败' },
-    };
-    
-    const config = statusConfig[status] || statusConfig.not_built;
-    const tag = (
-      <Tag icon={config.icon} color={config.color}>
-        {config.text}
-      </Tag>
-    );
-    
-    // 如果有错误信息，添加提示
-    if (status === 'failed' && kgErrorMessage) {
-      return (
-        <Tooltip title={kgErrorMessage}>
-          {tag}
-        </Tooltip>
-      );
-    }
-    
-    return tag;
-  };
   
   // 过滤知识库
   const filteredKBs = knowledgeBases.filter(kb =>
@@ -1791,15 +1486,7 @@ const KnowledgeBase: React.FC = () => {
       matchesFileType = fileExt === docFileTypeFilter;
     }
     
-    // 知识图谱状态筛选（仅对JSON文件生效）
-    let matchesKgStatus = true;
-    const fileExt = doc.filename.toLowerCase().split('.').pop() || '';
-    if (docFileTypeFilter === 'json' && fileExt === 'json' && docKgStatusFilter !== 'all') {
-      const kgStatus = doc.kg_status || 'not_built';
-      matchesKgStatus = kgStatus === docKgStatusFilter;
-    }
-    
-    return matchesSearch && matchesStatus && matchesFileType && matchesKgStatus;
+    return matchesSearch && matchesStatus && matchesFileType;
   });
   
   // ==================== 表格列定义 ====================
@@ -2042,20 +1729,6 @@ const KnowledgeBase: React.FC = () => {
       width: 120,
       align: 'center',
       render: (status, record) => getDocStatusTag(status, record),
-    },
-    {
-      title: '知识图谱',
-      key: 'kg_status',
-      width: 120,
-      align: 'center',
-      render: (_, record) => {
-        // 只有JSON文件才显示知识图谱状态
-        const fileExt = record.filename.toLowerCase().split('.').pop() || '';
-        if (fileExt !== 'json') {
-          return <Text type="secondary">-</Text>;
-        }
-        return getKgStatusTag(record.kg_status, record.kg_error_message);
-      },
     },
     {
       title: '上传时间',
@@ -2445,10 +2118,6 @@ const KnowledgeBase: React.FC = () => {
               value={docFileTypeFilter}
               onChange={(value) => {
                 setDocFileTypeFilter(value);
-                // 切换文件类型时，重置知识图谱状态筛选
-                if (value !== 'json') {
-                  setDocKgStatusFilter('all');
-                }
               }}
               style={{ width: 150 }}
               placeholder="文件类型"
@@ -2462,21 +2131,6 @@ const KnowledgeBase: React.FC = () => {
               <Option value="docx">Word文档(新)</Option>
             </Select>
             
-            {/* 知识图谱状态筛选 - 仅在选择JSON文件类型时显示 */}
-            {docFileTypeFilter === 'json' && (
-              <Select
-                value={docKgStatusFilter}
-                onChange={setDocKgStatusFilter}
-                style={{ width: 160 }}
-                placeholder="图谱状态"
-              >
-                <Option value="all">全部图谱状态</Option>
-                <Option value="not_built">未构建</Option>
-                <Option value="building">构建中</Option>
-                <Option value="success">构建成功</Option>
-                <Option value="failed">构建失败</Option>
-              </Select>
-            )}
           </Space>
           
           <Space>
@@ -2505,70 +2159,8 @@ const KnowledgeBase: React.FC = () => {
                 解析总文档
               </Button>
             </Tooltip>
-            
-            {/* 批量创建知识图谱按钮 - 仅在筛选为JSON且有可构建的JSON文件时显示 */}
-            {docFileTypeFilter === 'json' && (() => {
-              // 统计可以构建知识图谱的JSON文件（未构建或失败的）
-              const buildableJsonDocs = documents.filter(d => {
-                const fileExt = d.filename.toLowerCase().split('.').pop() || '';
-                const kgStatus = d.kg_status || 'not_built';
-                return fileExt === 'json' && (kgStatus === 'not_built' || kgStatus === 'failed');
-              });
-              return buildableJsonDocs.length > 0 && (
-                <Button
-                  type="primary"
-                  icon={<ShareAltOutlined />}
-                  onClick={handleBatchCreateKnowledgeGraph}
-                  loading={batchCreatingKG}
-                  style={{ background: '#52c41a', borderColor: '#52c41a' }}
-                >
-                  {batchCreatingKG 
-                    ? `提交中 (${kgCreationProgress.completed}/${kgCreationProgress.total})` 
-                    : `创建知识图谱 (${buildableJsonDocs.length})`}
-                </Button>
-              );
-            })()}
-            
-            {/* 🆕 创建总文档知识图谱按钮 - 不受筛选和分页限制，始终显示 */}
-            <Tooltip title="为知识库中所有未创建图谱的JSON文档创建知识图谱（不受当前筛选和分页限制）">
-              <Button
-                type="default"
-                icon={<ShareAltOutlined />}
-                onClick={handleCreateAllKnowledgeGraphs}
-                loading={batchCreatingKG}
-                style={{ borderColor: '#52c41a', color: '#52c41a' }}
-              >
-                创建总文档图谱
-              </Button>
-            </Tooltip>
           </Space>
         </Space>
-        
-        {/* 批量创建知识图谱进度提示 */}
-        {batchCreatingKG && (
-          <Alert
-            message="正在提交知识图谱构建任务"
-            description={
-              <div>
-                <Progress 
-                  percent={Math.round((kgCreationProgress.completed / kgCreationProgress.total) * 100)} 
-                  status="active"
-                  strokeColor="#52c41a"
-                />
-                <div style={{ marginTop: 8 }}>
-                  已提交: {kgCreationProgress.completed}/{kgCreationProgress.total}
-                  {kgCreationProgress.failed > 0 && `, 失败: ${kgCreationProgress.failed}`}
-                </div>
-                <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
-                  提示：任务已在后台处理，即使关闭页面也会继续执行...
-                </div>
-              </div>
-            }
-            type="success"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
         
         <Table
           columns={docColumns}

@@ -73,7 +73,6 @@ import ThemeToggle from '../../components/ThemeToggle';
 import ImageCompressor from '../../components/ImageCompressor';
 import ToolConfigPanel from '../../components/chat/ToolConfigPanel';
 import GroupStrategyConfigModal from '../../components/GroupStrategyConfig';
-import KnowledgeGraphViewer from '../../components/KnowledgeGraphViewer';
 import authAxios from '../../utils/authAxios';
 import api from '../../utils/api';
 // 导入logo图片
@@ -8924,15 +8923,6 @@ const Chat: React.FC = () => {
         />
       )}
 
-      {/* 🆕 知识图谱可视化模态框 */}
-      <KnowledgeGraphViewer
-        visible={graphViewerVisible}
-        graphDataList={selectedGraphData}
-        onClose={() => {
-          setGraphViewerVisible(false);
-          setSelectedGraphData([]);
-        }}
-      />
 
     </Layout>
   );

@@ -1,0 +1,41 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  line-height: 1.5;
+  font-weight: 400;
+  
+  /* 移动端真实视口高度 - 解决地址栏/工具栏占位问题 */
+  --real-vh: 1vh;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  /* 禁止移动端滚动 */
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  /* 使用 dvh (dynamic viewport height) - 自动适应浏览器 UI 变化 */
+  height: 100dvh;
+  /* fallback 使用 CSS 变量 */
+  height: calc(var(--real-vh, 1vh) * 100);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  /* 使用 dvh (dynamic viewport height) */
+  height: 100dvh;
+  /* fallback 使用 CSS 变量 */
+  height: calc(var(--real-vh, 1vh) * 100);
+  overflow: hidden;
+} 
+

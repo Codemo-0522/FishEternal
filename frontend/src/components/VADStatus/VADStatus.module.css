@@ -1,0 +1,257 @@
+.vadStatus {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 12px;
+  padding: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  overflow: hidden;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mainContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  position: relative;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.statusIcon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  color: #333;
+}
+
+.textContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.statusText {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.subText {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.3;
+}
+
+.statsInfo {
+  color: #999;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* 中断按钮 */
+.cancelButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  transform: scale(1.05);
+}
+
+.cancelButton:active {
+  transform: scale(0.95);
+}
+
+/* 状态指示条 */
+.statusBar {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.statusIndicator {
+  height: 100%;
+  width: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: width 0.3s ease;
+}
+
+/* 状态特定的指示条颜色和动画 */
+.indicator_recording {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  animation: pulse 1.5s ease-in-out infinite;
+  width: 40%;
+}
+
+.indicator_speaking {
+  background: linear-gradient(90deg, #f093fb, #f5576c);
+  animation: progress 1s ease-in-out infinite;
+  width: 70%;
+}
+
+.indicator_silence {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  animation: countdown 1.5s linear forwards;
+  width: 100%;
+}
+
+.indicator_transcribing {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+  animation: pulse 1s ease-in-out infinite;
+  width: 100%;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  0%, 100% {
+    width: 70%;
+  }
+  50% {
+    width: 85%;
+  }
+}
+
+@keyframes countdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* 状态特定的图标容器样式 */
+.recording .iconContainer {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+}
+
+.recording .statusIcon {
+  color: #667eea;
+}
+
+.speaking .iconContainer {
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.15), rgba(245, 87, 108, 0.15));
+}
+
+.speaking .statusIcon {
+  color: #f5576c;
+}
+
+.silence .iconContainer {
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.15));
+}
+
+.silence .statusIcon {
+  color: #4facfe;
+}
+
+.transcribing .iconContainer {
+  background: linear-gradient(135deg, rgba(67, 233, 123, 0.15), rgba(56, 249, 215, 0.15));
+}
+
+.transcribing .statusIcon {
+  color: #43e97b;
+}
+
+/* 声波动画 */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  margin-left: auto;
+}
+
+.wave {
+  width: 3px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  animation: wave 0.8s ease-in-out infinite;
+}
+
+.wave:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.wave:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.wave:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.wave:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+

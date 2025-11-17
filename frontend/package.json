@@ -1,0 +1,44 @@
+{
+  "name": "Fish-Chat-Frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "@antv/g6": "^5.0.50",
+    "@types/highlight.js": "^9.12.4",
+    "@types/lodash": "^4.17.20",
+    "@uiw/react-json-view": "^2.0.0-alpha.33",
+    "antd": "^5.12.2",
+    "axios": "^1.6.2",
+    "highlight.js": "^11.11.1",
+    "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-image-crop": "^11.0.10",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.21.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}

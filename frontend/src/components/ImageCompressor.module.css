@@ -1,0 +1,492 @@
+.compressorModal {
+  --compressor-bg-primary: var(--bg-primary);
+  --compressor-bg-secondary: var(--bg-secondary);
+  --compressor-bg-tertiary: var(--bg-tertiary);
+  --compressor-text-primary: var(--text-primary);
+  --compressor-text-secondary: var(--text-secondary);
+  --compressor-border-color: var(--border-secondary);
+  --compressor-primary-color: var(--primary-color);
+}
+
+.modalTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--compressor-text-primary);
+}
+
+.compressorContent {
+  padding: 0;
+}
+
+.settingsCard,
+.progressCard,
+.resultCard {
+  margin-bottom: 16px;
+  border: 1px solid var(--compressor-border-color);
+  background: var(--compressor-bg-secondary);
+}
+
+.settingsCard .ant-card-head-title,
+.progressCard .ant-card-head-title,
+.resultCard .ant-card-head-title {
+  color: var(--compressor-text-primary);
+}
+
+.settingsCard .ant-card-body,
+.progressCard .ant-card-body,
+.resultCard .ant-card-body {
+  background: var(--compressor-bg-secondary);
+}
+
+.settingItem {
+  margin-bottom: 16px;
+}
+
+.settingItem:last-child {
+  margin-bottom: 0;
+}
+
+.settingItem .ant-typography {
+  color: var(--compressor-text-primary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.slider {
+  margin-bottom: 8px;
+}
+
+.slider .ant-slider-rail {
+  background-color: var(--compressor-bg-tertiary);
+}
+
+.slider .ant-slider-track {
+  background-color: var(--compressor-primary-color);
+}
+
+.slider .ant-slider-handle {
+  border-color: var(--compressor-primary-color);
+}
+
+.slider .ant-slider-handle:hover,
+.slider .ant-slider-handle:focus {
+  border-color: var(--compressor-primary-color);
+  box-shadow: 0 0 0 5px rgba(24, 144, 255, 0.12);
+}
+
+.slider .ant-slider-mark-text {
+  color: var(--compressor-text-primary) !important;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.resultTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.resultTitle > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compressionSummary {
+  background: var(--compressor-primary-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.resultSummary {
+  background: var(--compressor-bg-tertiary);
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.resultSummary .ant-typography {
+  color: var(--compressor-text-primary);
+}
+
+.imageGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.imageGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.imageGrid::-webkit-scrollbar-track {
+  background: var(--compressor-bg-tertiary);
+  border-radius: 3px;
+}
+
+.imageGrid::-webkit-scrollbar-thumb {
+  background: var(--compressor-border-color);
+  border-radius: 3px;
+}
+
+.imageGrid::-webkit-scrollbar-thumb:hover {
+  background: var(--compressor-text-secondary);
+}
+
+.imageComparison {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--compressor-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--compressor-border-color);
+}
+
+.imageItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.imageItem img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--compressor-border-color);
+  transition: all 0.2s ease;
+}
+
+.imageItem img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.imageInfo {
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.imageInfo .ant-typography {
+  color: var(--compressor-text-primary);
+  margin: 0;
+  font-size: 12px;
+}
+
+.arrow {
+  font-size: 18px;
+  color: var(--compressor-primary-color);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.confirmButton {
+  background: var(--compressor-primary-color) !important;
+  border-color: var(--compressor-primary-color) !important;
+}
+
+.confirmButton:hover {
+  opacity: 0.8;
+}
+
+/* 深色主题适配 */
+[data-theme="dark"] .compressorModal {
+  --compressor-bg-primary: #141414;
+  --compressor-bg-secondary: #1f1f1f;
+  --compressor-bg-tertiary: #262626;
+  --compressor-text-primary: rgba(255, 255, 255, 0.85);
+  --compressor-text-secondary: rgba(255, 255, 255, 0.65);
+  --compressor-border-color: #434343;
+}
+
+[data-theme="dark"] .imageItem img:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* 深色模式下确保滑条标记使用主色调 */
+[data-theme="dark"] .compressorModal .slider .ant-slider-mark-text {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* 深色模式下按钮文字使用正确的主题色 */
+[data-theme="dark"] .compressorModal .ant-btn-primary {
+  color: var(--text-inverse) !important;
+  font-weight: 500 !important;
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .compressorModal .ant-btn-primary:hover {
+  color: var(--text-inverse) !important;
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+[data-theme="dark"] .compressorModal .ant-btn-primary:focus {
+  color: var(--text-inverse) !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .imageComparison {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+  }
+
+  .imageItem img {
+    width: 100px;
+    height: 67px;
+  }
+
+  .settingItem .ant-typography {
+    font-size: 14px;
+  }
+
+  .resultSummary .ant-col {
+    margin-bottom: 8px;
+  }
+}
+
+/* 进度条样式 */
+.progressCard .ant-progress-inner {
+  background-color: var(--compressor-bg-tertiary);
+}
+
+.progressCard .ant-progress-bg {
+  background-color: var(--compressor-primary-color);
+}
+
+/* 开关样式 */
+.settingItem .ant-switch {
+  background-color: var(--compressor-bg-tertiary);
+}
+
+.settingItem .ant-switch-checked {
+  background-color: var(--compressor-primary-color);
+}
+
+/* 按钮样式适配 */
+.compressorModal .ant-btn {
+  border-color: var(--compressor-border-color);
+  color: var(--compressor-text-primary);
+}
+
+.compressorModal .ant-btn:hover {
+  border-color: var(--compressor-primary-color);
+  color: var(--compressor-primary-color);
+}
+
+.compressorModal .ant-btn-primary {
+  background-color: var(--compressor-primary-color);
+  border-color: var(--compressor-primary-color);
+  color: white;
+}
+
+.compressorModal .ant-btn-primary:hover {
+  opacity: 0.8;
+}
+
+/* 图片选择卡片样式 */
+.selectionCard {
+  margin-bottom: 16px;
+  border: 1px solid var(--compressor-border-color);
+  background: var(--compressor-bg-secondary);
+}
+
+.selectionCard .ant-card-head-title,
+.selectionCard .ant-card-body {
+  background: var(--compressor-bg-secondary);
+}
+
+.selectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--compressor-primary-color);
+  width: 100%;
+}
+
+.selectionTitle > span {
+  flex: 1;
+}
+
+.selectAllCheckbox {
+  font-weight: 500;
+  color: var(--compressor-text-secondary);
+}
+
+.selectAllCheckbox .ant-checkbox-wrapper {
+  color: var(--compressor-text-secondary);
+}
+
+/* 图片选择网格 */
+.imageSelectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.imageSelectionItem {
+  position: relative;
+  border: 1px solid var(--compressor-border-color);
+  border-radius: 6px;
+  padding: 8px;
+  background: var(--compressor-bg-primary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.imageSelectionItem:hover {
+  border-color: var(--compressor-primary-color);
+  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.15);
+}
+
+.imageSelectionItem.selected {
+  border-color: var(--compressor-primary-color);
+  background: var(--compressor-bg-tertiary);
+  box-shadow: 0 1px 4px rgba(24, 144, 255, 0.2);
+}
+
+.imageCheckbox {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+}
+
+.imagePreview {
+  width: 100%;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--compressor-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageDetails {
+  text-align: center;
+}
+
+.imageName {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--compressor-text-primary);
+  font-size: 12px;
+}
+
+.imageSize {
+  display: block;
+  font-size: 11px;
+  color: var(--compressor-text-secondary);
+}
+
+/* 深色主题下的图片选择样式 */
+[data-theme="dark"] .imageSelectionItem:hover {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .imageSelectionItem.selected {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
+}
+
+/* 响应式图片选择网格 */
+@media (max-width: 768px) {
+  .imageSelectionGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .imagePreview {
+    height: 70px;
+  }
+
+  .imageName {
+    font-size: 11px;
+  }
+
+  .imageSize {
+    font-size: 10px;
+  }
+
+  .selectionTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .selectAllCheckbox {
+    align-self: flex-end;
+  }
+
+  .imageSelectionItem {
+    padding: 6px;
+  }
+}
+
+/* 强制覆盖滑条标记文字颜色 */
+.compressorModal .ant-slider-mark-text,
+.compressorModal .ant-slider-mark .ant-slider-mark-text {
+  color: var(--compressor-text-primary) !important;
+}
+
+/* 深色模式下强制覆盖 */
+[data-theme="dark"] .compressorModal .ant-slider-mark-text,
+[data-theme="dark"] .compressorModal .ant-slider-mark .ant-slider-mark-text {
+  color: #ffffff !important;
+}
+
+/* 确保所有文字元素都使用正确颜色 */
+.compressorModal .ant-typography {
+  color: var(--compressor-text-primary) !important;
+}
+
+[data-theme="dark"] .compressorModal .ant-typography {
+  color: #ffffff !important;
+}
+
+/* 按钮文字颜色修复 */
+.compressorModal .ant-btn-primary {
+  color: #ffffff !important;
+}
+
+.compressorModal .ant-btn-default {
+  color: var(--compressor-text-primary) !important;
+}
+
+[data-theme="dark"] .compressorModal .ant-btn-default {
+  color: #ffffff !important;
+} 

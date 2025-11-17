@@ -1,0 +1,37 @@
+[
+  {
+    "id": "x4_xiaoyan",
+    "name": "小燕",
+    "category": "普通话",
+    "language": "中文",
+    "gender": "female"
+  },
+  {
+    "id": "x4_yezi",
+    "name": "小露",
+    "category": "普通话",
+    "language": "中文",
+    "gender": "female"
+  },
+  {
+    "id": "aisjiuxu",
+    "name": "许久",
+    "category": "普通话",
+    "language": "中文",
+    "gender": "male"
+  },
+  {
+    "id": "aisjinger",
+    "name": "小婧",
+    "category": "普通话",
+    "language": "中文",
+    "gender": "female"
+  },
+  {
+    "id": "aisbabyxu",
+    "name": "许小宝",
+    "category": "普通话",
+    "language": "中文",
+    "gender": "male"
+  }
+]

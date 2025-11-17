@@ -1,0 +1,73 @@
+# ====================================================================
+# FishChat 项目依赖清单（跨平台兼容版本）
+# ====================================================================
+# 说明：此文件已移除 Windows 特定依赖，支持在 Windows/Linux/MacOS 上部署
+# ====================================================================
+
+# Web 框架
+fastapi
+uvicorn
+
+# 配置与环境
+python-dotenv
+pydantic-settings
+
+# 数据校验
+pydantic
+email-validator
+python-multipart
+
+# 数据库（MongoDB）
+motor
+pymongo
+
+# 内存数据库
+redis
+
+# 知识图谱数据库
+neo4j
+
+# HTTP / 网络与流式
+httpx
+requests
+aiohttp
+websockets
+websocket-client
+
+# 对象存储与安全
+minio
+cryptography
+pyOpenSSL
+python-jose[cryptography]
+passlib[bcrypt]
+
+# 向量数据库 / RAG
+chromadb
+langchain-core
+langchain-text-splitters
+langchain-chroma
+langchain-community
+ragflow-sdk
+filelock  # 多进程文件锁（防止 ChromaDB 索引损坏）
+faiss-cpu
+
+# LLM / Embedding
+openai
+torch
+sentence-transformers
+volcengine-python-sdk
+
+# 文档解析
+python-docx
+
+# MCP
+mcp
+
+# 网络搜索
+duckduckgo-search
+
+# 定时任务
+apscheduler
+
+# 计算token
+tiktoken

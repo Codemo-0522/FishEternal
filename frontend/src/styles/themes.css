@@ -1,0 +1,223 @@
+/** 主题变量定义 */
+
+/* 移动端安全区域处理（刘海屏/Home Indicator） */
+:root {
+  /* iOS 安全区域 - 用于适配刘海屏和底部 Home Indicator */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+:root {
+  /* 浅色主题 (默认) */
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --primary-active: #096dd9;
+  
+  /* RGB 颜色值（用于透明度控制） */
+  --primary-color-rgb: 24, 144, 255;
+  --bg-primary-rgb: 255, 255, 255;
+  --input-bg-rgb: 255, 255, 255;
+  --code-block-bg-rgb: 245, 245, 245;
+  
+  /* 背景色 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f0f2f5;
+  --bg-card: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-input: #ffffff;
+  --bg-modal: #ffffff;
+  --bg-dropdown: #ffffff;
+  --bg-tooltip: #ffffff;
+  
+  /* 文字颜色 */
+  --text-primary: #262626;
+  --text-secondary: #595959;
+  --text-tertiary: #8c8c8c;
+  --text-disabled: #bfbfbf;
+  --text-inverse: #000000;
+  --text-placeholder: #bfbfbf;
+  --text-input: #262626;
+  
+  /* 边框颜色 */
+  --border-primary: #d9d9d9;
+  --border-secondary: #e8e8e8;
+  --border-light: #f0f0f0;
+  --border-input: #d9d9d9;
+  --border-input-focus: #1890ff;
+  
+  /* 阴影 */
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.2);
+  --shadow-heavy: 0 10px 28px rgba(0, 0, 0, 0.25);
+  
+  /* 状态颜色 */
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  --info-color: #1890ff;
+  
+  /* 特殊组件颜色 */
+  --message-bg-user: #e6f7ff;
+  --message-bg-assistant: #f6f6f6;
+  --message-border-user: #91d5ff;
+  --message-border-assistant: #e8e8e8;
+  
+  /* 侧边栏颜色 */
+  --sider-bg: #ffffff;
+  --sider-border: #e8e8e8;
+  --session-item-bg: transparent;
+  --session-item-hover: #f5f5f5;
+  --session-item-active: #e6f7ff;
+  --session-name: #262626;
+  --session-count: #8c8c8c;
+  
+  /* 输入框颜色 */
+  --input-bg: #ffffff;
+  --input-text: #262626;
+  --input-border: #d9d9d9;
+  --input-border-focus: #1890ff;
+  --input-placeholder: #bfbfbf;
+  
+  /* 模态框颜色 */
+  --modal-bg: #ffffff;
+  --modal-header-bg: #ffffff;
+  --modal-content-bg: #ffffff;
+  --modal-footer-bg: #ffffff;
+  --modal-border: #e8e8e8;
+  --modal-text: #262626;
+  --modal-close: #8c8c8c;
+  
+  /* 下拉菜单颜色 */
+  --dropdown-bg: #ffffff;
+  --dropdown-item-bg: #ffffff;
+  --dropdown-item-hover: #f5f5f5;
+  --dropdown-text: #262626;
+  
+  /* 滚动条 */
+  --scrollbar-track: #f5f5f5;
+  --scrollbar-thumb: #d9d9d9;
+  --scrollbar-thumb-hover: #bfbfbf;
+  
+  /* 代码块颜色 */
+  --code-block-bg: #f5f5f5;
+  --code-block-header-bg: rgba(0, 0, 0, 0.05);
+  --code-block-border: rgba(0, 0, 0, 0.08);
+  --code-block-text: #262626;
+  --code-block-line-number: rgba(0, 0, 0, 0.4);
+  --code-block-line-number-bg: rgba(0, 0, 0, 0.03);
+  
+  /* AI 评论特殊颜色 */
+  --ai-comment-bg: #f0f5ff;
+  
+  /* 未解析标签颜色 */
+  --tag-unparsed-bg: rgba(0, 0, 0, 0.06);
+  --tag-unparsed-text: rgba(0, 0, 0, 0.45);
+  --tag-unparsed-border: rgba(0, 0, 0, 0.15);
+}
+
+/* 深色主题 */
+[data-theme="dark"] {
+  /* RGB 颜色值（用于透明度控制） */
+  --primary-color-rgb: 23, 125, 220;
+  --bg-primary-rgb: 20, 20, 20;
+  --input-bg-rgb: 31, 31, 31;
+  --code-block-bg-rgb: 30, 30, 30;
+  
+  /* 背景色 */
+  --bg-primary: #2a2a2a;
+  --bg-secondary: #1f1f1f;
+  --bg-tertiary: #262626;
+  --bg-card: #1f1f1f;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+  --bg-input: #1f1f1f;
+  --bg-modal: #1f1f1f;
+  --bg-dropdown: #1f1f1f;
+  --bg-tooltip: #1f1f1f;
+  
+  /* 文字颜色 */
+  --text-primary: #ffffff;
+  --text-secondary: #d9d9d9;
+  --text-tertiary: #a6a6a6;
+  --text-disabled: #595959;
+  --text-inverse: #ffffff;
+  --text-placeholder: #595959;
+  --text-input: #ffffff;
+  
+  /* 边框颜色 */
+  --border-primary: #434343;
+  --border-secondary: #303030;
+  --border-light: #262626;
+  --border-input: #434343;
+  --border-input-focus: #177ddc;
+  
+  /* 阴影 */
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.5);
+  --shadow-heavy: 0 10px 28px rgba(0, 0, 0, 0.6);
+  
+  /* 特殊组件颜色 */
+  --message-bg-user: #111b26;
+  --message-bg-assistant: #1f1f1f;
+  --message-border-user: #177ddc;
+  --message-border-assistant: #434343;
+  
+  /* 侧边栏颜色 */
+  --sider-bg: #1f1f1f;
+  --sider-border: #303030;
+  --session-item-bg: transparent;
+  --session-item-hover: #262626;
+  --session-item-active: #111b26;
+  --session-name: #ffffff;
+  --session-count: #a6a6a6;
+  
+  /* 输入框颜色 */
+  --input-bg: #1f1f1f;
+  --input-text: #ffffff;
+  --input-border: #434343;
+  --input-border-focus: #177ddc;
+  --input-placeholder: #595959;
+  
+  /* 模态框颜色 */
+  --modal-bg: #1f1f1f;
+  --modal-header-bg: #1f1f1f;
+  --modal-content-bg: #1f1f1f;
+  --modal-footer-bg: #1f1f1f;
+  --modal-border: #303030;
+  --modal-text: #ffffff;
+  --modal-close: #a6a6a6;
+  
+  /* 下拉菜单颜色 */
+  --dropdown-bg: #1f1f1f;
+  --dropdown-item-bg: #1f1f1f;
+  --dropdown-item-hover: #262626;
+  --dropdown-text: #ffffff;
+  
+  /* 滚动条 */
+  --scrollbar-track: #262626;
+  --scrollbar-thumb: #434343;
+  --scrollbar-thumb-hover: #595959;
+  
+  /* 代码块颜色 */
+  --code-block-bg: #1e1e1e;
+  --code-block-header-bg: rgba(255, 255, 255, 0.05);
+  --code-block-border: rgba(255, 255, 255, 0.1);
+  --code-block-text: #d4d4d4;
+  --code-block-line-number: rgba(212, 212, 212, 0.5);
+  --code-block-line-number-bg: rgba(255, 255, 255, 0.05);
+  
+  /* AI 评论特殊颜色 */
+  --ai-comment-bg: rgba(102, 126, 234, 0.1);
+  
+  /* 未解析标签颜色（深色主题） */
+  --tag-unparsed-bg: rgba(255, 255, 255, 0.08);
+  --tag-unparsed-text: rgba(255, 255, 255, 0.45);
+  --tag-unparsed-border: rgba(255, 255, 255, 0.2);
+}
+
+/* 主题切换动画 */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+} 

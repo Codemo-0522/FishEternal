@@ -1,0 +1,354 @@
+[
+    {
+    "id": "zh_female_wanqudashu_moon_bigtts",
+    "name": "湾区大叔",
+    "category": "趣味方言",
+    "language": "中文",
+    "gender": "male"
+    },
+    {
+    "id": "zh_female_daimengchuanmei_moon_bigtts",
+    "name": "呆萌川妹",
+    "category": "趣味方言",
+    "language": "中文",
+    "gender": "female"
+    },
+    {
+    "id": "zh_male_guozhoudege_moon_bigtts",
+    "name": "广州德哥",
+    "category": "趣味方言",
+    "language": "中文",
+    "gender": "male"
+    },
+    {
+    "id": "zh_male_beijingxiaoye_moon_bigtts",
+    "name": "北京小爷",
+    "category": "趣味方言",
+    "language": "中文",
+    "gender": "male"
+    },
+    {
+    "id": "zh_male_shaonianzixin_moon_bigtts",
+    "name": "少年梓辛 / Brayan",
+    "category": "通用场景",
+    "language": "中 / 英",
+    "gender": "male"
+    },
+    {
+    "id": "zh_female_meilinvyou_moon_bigtts",
+    "name": "魅力女友",
+    "category": "角色扮演",
+    "language": "中文",
+    "gender": "female"
+    },
+    {
+    "id": "zh_male_shenyeboke_moon_bigtts",
+    "name": "深夜播客",
+    "category": "角色扮演",
+    "language": "中文",
+    "gender": "male"
+    },
+    {
+    "id": "zh_female_sajiaonvyou_moon_bigtts",
+    "name": "柔美女友",
+    "category": "角色扮演",
+    "language": "中文",
+    "gender": "female"
+    },
+    {
+    "id": "zh_female_yuanqinvyou_moon_bigtts",
+    "name": "撒娇学妹",
+    "category": "角色扮演",
+    "language": "中文",
+    "gender": "female"
+    },
+    {
+    "id": "zh_male_haoyuxiaoge_moon_bigtts",
+    "name": "浩宇小哥",
+    "category": "趣味方言",
+    "language": "中文",
+    "gender": "male"
+    },
+    {
+      "id": "zh_male_guangxiyuanzhou_moon_bigtts",
+      "name": "广西远舟",
+      "category": "趣味方言",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_meituojieer_moon_bigtts",
+      "name": "妹坨洁儿",
+      "category": "趣味方言",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_yuzhouzixuan_moon_bigtts",
+      "name": "豫州子轩",
+      "category": "趣味方言",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_linjianvhai_moon_bigtts",
+      "name": "邻家女孩",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_gaolengyujie_moon_bigtts",
+      "name": "高冷御姐",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_yuanboxiaoshu_moon_bigtts",
+      "name": "渊博小叔",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_yangguangqingnian_moon_bigtts",
+      "name": "阳光青年",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_aojiaobazong_moon_bigtts",
+      "name": "傲娇霸总",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_jingqiangkanye_moon_bigtts",
+      "name": "京腔侃爷/Harmony",
+      "category": "趣味方言",
+      "language": "中/英",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_shuangkuaisisi_moon_bigtts",
+      "name": "爽快思思/Skye",
+      "category": "通用场景",
+      "language": "中/英",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_wennuanahu_moon_bigtts",
+      "name": "温暖阿虎/Alvin",
+      "category": "通用场景",
+      "language": "中/英",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_wanwanxiaohe_moon_bigtts",
+      "name": "湾湾小何",
+      "category": "趣味方言",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "multi_female_shuangkuaisisi_moon_bigtts",
+      "name": "はるこ/Esmeralda",
+      "category": "多语种",
+      "language": "日/西",
+      "gender": "female"
+    },
+    {
+      "id": "multi_male_jingqiangkanye_moon_bigtts",
+      "name": "かずね/Javier or Álvaro",
+      "category": "多语种",
+      "language": "日/西",
+      "gender": "male"
+    },
+    {
+      "id": "multi_female_gaolengyujie_moon_bigtts",
+      "name": "あけみ",
+      "category": "多语种",
+      "language": "日语",
+      "gender": "female"
+    },
+    {
+      "id": "multi_male_wanqudashu_moon_bigtts",
+      "name": "ひろし/Roberto",
+      "category": "多语种",
+      "language": "日/西",
+      "gender": "male"
+    },
+    {
+      "id": "ICL_zh_female_bingruoshaonv_tob",
+      "name": "病弱少女",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "ICL_zh_female_huoponvhai_tob",
+      "name": "活泼女孩",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "ICL_zh_female_heainainai_tob",
+      "name": "和蔼奶奶",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "ICL_zh_female_linjuayi_tob",
+      "name": "邻居阿姨",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_wenrouxiaoya_moon_bigtts",
+      "name": "温柔小雅",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_tianmeixiaoyuan_moon_bigtts",
+      "name": "甜美小源",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_qingchezizi_moon_bigtts",
+      "name": "清澈梓梓",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_dongfanghaoran_moon_bigtts",
+      "name": "东方浩然",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_jieshuoxiaoming_moon_bigtts",
+      "name": "解说小明",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_kailangjiejie_moon_bigtts",
+      "name": "开朗姐姐",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_linjiananhai_moon_bigtts",
+      "name": "邻家男孩",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_tianmeiyueyue_moon_bigtts",
+      "name": "甜美悦悦",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_xinlingjitang_moon_bigtts",
+      "name": "心灵鸡汤",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_cancan_mars_bigtts",
+      "name": "灿灿",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "en_female_anna_mars_bigtts",
+      "name": "Anna",
+      "category": "播报解说",
+      "language": "英文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_tiancaitongsheng_mars_bigtts",
+      "name": "天才童声",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_naiqimengwa_mars_bigtts",
+      "name": "奶气萌娃",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_sunwukong_mars_bigtts",
+      "name": "猴哥",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_male_xionger_mars_bigtts",
+      "name": "熊二",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_peiqi_mars_bigtts",
+      "name": "佩奇猪",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_zhixingnvsheng_mars_bigtts",
+      "name": "知性女声",
+      "category": "通用场景",
+      "language": "中文",
+      "gender": "female"
+    },
+    {
+      "id": "zh_female_qingxinnvsheng_mars_bigtts",
+      "name": "清新女声",
+      "category": "通用场景",
+      "language": "中/英",
+      "gender": "female"
+    },
+    {
+      "id": "zh_male_changtianyi_mars_bigtts",
+      "name": "悬疑解说",
+      "category": "播报解说",
+      "language": "中文",
+      "gender": "male"
+    },
+    {
+      "id": "zh_female_popo_mars_bigtts",
+      "name": "婆婆",
+      "category": "角色扮演",
+      "language": "中文",
+      "gender": "female"
+    }
+
+]
+    

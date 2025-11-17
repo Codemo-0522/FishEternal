@@ -1,0 +1,644 @@
+/**
+ * 知识库管理页面样式
+ * 支持深色/浅色主题和响应式设计
+ */
+
+.knowledgeBase {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-color);
+}
+
+.header {
+  height: 64px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.headerContent {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content {
+  padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 64px);
+  background: var(--bg-color);
+}
+
+/* 自定义滚动条 */
+.content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ==================== 列表视图 ==================== */
+
+.statisticsRow {
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.actionCard {
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.actionBar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tableCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.tableCard :global(.ant-table) {
+  background: transparent;
+}
+
+.tableCard :global(.ant-table-thead > tr > th) {
+  background: var(--table-header-bg);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tableCard :global(.ant-table-tbody > tr:hover > td) {
+  background: var(--table-row-hover);
+}
+
+.tableCard :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ==================== 详情视图 ==================== */
+
+.backCard {
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.infoCard {
+  margin-bottom: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.infoCard :global(.ant-descriptions-item-label) {
+  background: var(--table-header-bg);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.infoCard :global(.ant-descriptions-item-content) {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.documentCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+/* ==================== 表单样式 ==================== */
+
+.kbForm {
+  margin-top: 24px;
+}
+
+.kbForm :global(.ant-form-item-label > label) {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.kbForm :global(.ant-input),
+.kbForm :global(.ant-input-number),
+.kbForm :global(.ant-select-selector),
+.kbForm :global(.ant-input-textarea) {
+  background: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.kbForm :global(.ant-input:hover),
+.kbForm :global(.ant-input-number:hover),
+.kbForm :global(.ant-select-selector:hover),
+.kbForm :global(.ant-input-textarea:hover) {
+  border-color: var(--primary-color);
+}
+
+.kbForm :global(.ant-input:focus),
+.kbForm :global(.ant-input:focus-within),
+.kbForm :global(.ant-input-number:focus),
+.kbForm :global(.ant-input-number:focus-within),
+.kbForm :global(.ant-select-selector:focus),
+.kbForm :global(.ant-select-selector:focus-within),
+.kbForm :global(.ant-input-textarea:focus),
+.kbForm :global(.ant-input-textarea:focus-within) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.kbForm :global(.ant-select-dropdown) {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.kbForm :global(.ant-select-item) {
+  color: var(--text-primary);
+}
+
+.kbForm :global(.ant-select-item:hover) {
+  background: var(--table-row-hover);
+}
+
+.kbForm :global(.ant-select-item-option-selected) {
+  background: var(--primary-color-light);
+}
+
+/* ==================== 响应式设计 ==================== */
+
+/* 平板设备 (768px - 1024px) */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 16px;
+  }
+  
+  .content {
+    padding: 16px;
+  }
+  
+  .statisticsRow .statCard {
+    margin-bottom: 12px;
+  }
+}
+
+/* 移动设备 (< 768px) */
+@media (max-width: 768px) {
+  .header {
+    height: 56px;
+    padding: 0 12px;
+  }
+  
+  .headerContent h3 {
+    font-size: 16px !important;
+  }
+  
+  .content {
+    padding: 12px;
+    height: calc(100vh - 56px);
+  }
+  
+  .statisticsRow {
+    margin-bottom: 16px;
+  }
+  
+  .actionBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .actionBar button,
+  .actionBar input {
+    width: 100%;
+  }
+  
+  .tableCard :global(.ant-table) {
+    font-size: 12px;
+  }
+  
+  .infoCard :global(.ant-descriptions) {
+    font-size: 12px;
+  }
+}
+
+/* 小屏手机 (< 480px) */
+@media (max-width: 480px) {
+  .header {
+    height: 48px;
+  }
+  
+  .headerContent h3 {
+    font-size: 14px !important;
+  }
+  
+  .headerContent :global(.ant-tag) {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+  
+  .content {
+    padding: 8px;
+    height: calc(100vh - 48px);
+  }
+  
+  .statisticsRow :global(.ant-statistic .ant-statistic-title) {
+    font-size: 12px;
+  }
+  
+  .statisticsRow :global(.ant-statistic .ant-statistic-content) {
+    font-size: 18px;
+  }
+}
+
+/* ==================== 主题变量 ==================== */
+
+/* 浅色主题 */
+:global(.light-theme) .knowledgeBase {
+  --bg-color: #f5f5f5;
+  --card-bg: #ffffff;
+  --border-color: #e8e8e8;
+  --text-primary: rgba(0, 0, 0, 0.85);
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --table-header-bg: #fafafa;
+  --table-row-hover: #f5f5f5;
+  --input-bg: #ffffff;
+  --primary-color: #1890ff;
+  --primary-color-light: rgba(24, 144, 255, 0.1);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+}
+
+/* 深色主题 */
+:global(.dark-theme) .knowledgeBase {
+  --bg-color: #141414;
+  --card-bg: #1f1f1f;
+  --border-color: #303030;
+  --text-primary: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --table-header-bg: #262626;
+  --table-row-hover: #262626;
+  --input-bg: #262626;
+  --primary-color: #1890ff;
+  --primary-color-light: rgba(24, 144, 255, 0.15);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+}
+
+/* ==================== 动画效果 ==================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.listView,
+.detailView {
+  animation: fadeIn 0.3s ease;
+}
+
+.knowledgeBase :global(.ant-card) {
+  transition: all 0.3s ease;
+}
+
+.knowledgeBase :global(.ant-btn) {
+  transition: all 0.2s ease;
+}
+
+.knowledgeBase :global(.ant-table-row) {
+  transition: background-color 0.2s ease;
+}
+
+/* ==================== 自定义组件样式 ==================== */
+
+/* 上传区域 */
+.knowledgeBase :global(.ant-upload-drag) {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.knowledgeBase :global(.ant-upload-drag:hover) {
+  border-color: var(--primary-color);
+}
+
+.knowledgeBase :global(.ant-upload-drag-icon) {
+  color: var(--primary-color);
+}
+
+.knowledgeBase :global(.ant-upload-text) {
+  color: var(--text-primary);
+}
+
+.knowledgeBase :global(.ant-upload-hint) {
+  color: var(--text-secondary);
+}
+
+/* 模态框 */
+.knowledgeBase :global(.ant-modal .ant-modal-content) {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.knowledgeBase :global(.ant-modal .ant-modal-header) {
+  background: var(--card-bg);
+  border-bottom-color: var(--border-color);
+}
+
+.knowledgeBase :global(.ant-modal .ant-modal-title) {
+  color: var(--text-primary);
+}
+
+.knowledgeBase :global(.ant-modal .ant-modal-footer) {
+  border-top-color: var(--border-color);
+}
+
+/* 描述列表 */
+.knowledgeBase :global(.ant-descriptions .ant-descriptions-view) {
+  border-color: var(--border-color);
+}
+
+/* 列表 */
+.knowledgeBase :global(.ant-list .ant-list-item) {
+  border-bottom-color: var(--border-color);
+}
+
+/* 空状态 */
+.knowledgeBase :global(.ant-empty .ant-empty-description) {
+  color: var(--text-secondary);
+}
+
+/* 标签 */
+.knowledgeBase :global(.ant-tag) {
+  border-color: transparent;
+}
+
+/* 进度条 */
+.knowledgeBase :global(.ant-progress .ant-progress-bg) {
+  background: var(--primary-color);
+}
+
+/* 徽章 */
+.knowledgeBase :global(.ant-badge .ant-badge-count) {
+  box-shadow: 0 0 0 1px var(--card-bg);
+}
+
+/* 分割线 */
+.knowledgeBase :global(.ant-divider) {
+  border-color: var(--border-color);
+}
+
+.knowledgeBase :global(.ant-divider .ant-divider-inner-text) {
+  color: var(--text-secondary);
+}
+
+/* ==================== 分片查看样式 ==================== */
+
+.chunksModal :global(.ant-modal-body) {
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+}
+
+.chunksContainer {
+  width: 100%;
+}
+
+.chunkItem {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+.chunkItem :global(.ant-list-item) {
+  border-bottom: none !important;
+}
+
+.chunkCard {
+  width: 100%;
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.chunkCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.chunkCard :global(.ant-card-head) {
+  background: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  min-height: auto;
+}
+
+.chunkCard :global(.ant-card-head-title) {
+  padding: 4px 0;
+}
+
+.chunkCard :global(.ant-card-body) {
+  padding: 16px;
+  background: var(--card-bg);
+}
+
+.chunkContent {
+  padding: 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.chunkContent:hover {
+  border-color: var(--primary-color);
+  background: var(--card-bg);
+}
+
+/* 分片列表滚动条 */
+.chunksModal :global(.ant-modal-body)::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chunksModal :global(.ant-modal-body)::-webkit-scrollbar-track {
+  background: var(--bg-color);
+  border-radius: 4px;
+}
+
+.chunksModal :global(.ant-modal-body)::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.chunksModal :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* 分片模态框标题适配 */
+.chunksModal :global(.ant-modal-header) {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chunksModal :global(.ant-modal-title) {
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 分片内容展开动画 */
+.chunkContent :global(.ant-typography-expand),
+.chunkContent :global(.ant-typography-collapse) {
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.chunkContent :global(.ant-typography-expand):hover,
+.chunkContent :global(.ant-typography-collapse):hover {
+  text-decoration: underline;
+}
+
+/* 响应式 - 分片查看 */
+@media (max-width: 768px) {
+  .chunksModal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .chunksModal :global(.ant-modal) {
+    top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  .chunksModal :global(.ant-modal-body) {
+    max-height: calc(100vh - 200px);
+  }
+  
+  .chunkCard :global(.ant-card-head) {
+    padding: 6px 12px;
+  }
+  
+  .chunkCard :global(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .chunkContent {
+    font-size: 12px;
+    padding: 8px;
+  }
+  
+  .chunksModal :global(.ant-modal-title) {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chunkCard {
+    margin-bottom: 12px;
+  }
+  
+  .chunkCard :global(.ant-card-head) {
+    padding: 4px 8px;
+  }
+  
+  .chunkCard :global(.ant-card-body) {
+    padding: 8px;
+  }
+  
+  .chunkContent {
+    font-size: 11px;
+    padding: 6px;
+  }
+  
+  .chunkCard :global(.ant-badge) {
+    font-size: 10px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+  }
+}
+
+/* ==================== 打印样式 ==================== */
+
+@media print {
+  .header {
+    display: none;
+  }
+  
+  .content {
+    padding: 0;
+    height: auto;
+  }
+  
+  .knowledgeBase :global(.ant-btn),
+  .knowledgeBase :global(.ant-pagination),
+  .knowledgeBase :global(.ant-table-column-sorter) {
+    display: none !important;
+  }
+  
+  /* 打印分片时的样式 */
+  .chunkCard {
+    page-break-inside: avoid;
+    margin-bottom: 12px;
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+  
+  .chunkContent {
+    background: white !important;
+    border: 1px solid #ddd;
+  }
+}
+

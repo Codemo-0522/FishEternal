@@ -1,0 +1,107 @@
+{
+  "tools": [
+    {
+      "name": "skip_reply",
+      "display_name": "跳过回复",
+      "description": "当 AI 判断不需要回复当前群聊消息时调用",
+      "category": "群聊工具"
+    },
+    {
+      "name": "ai_go_online",
+      "display_name": "AI上线",
+      "description": "AI 上线到群聊参与对话",
+      "category": "群聊工具"
+    },
+    {
+      "name": "ai_go_offline",
+      "display_name": "AI下线",
+      "description": "AI 从群聊下线",
+      "category": "群聊工具"
+    },
+    {
+      "name": "check_online_status",
+      "display_name": "查询在线状态",
+      "description": "查询 AI 在群聊中的在线状态",
+      "category": "群聊工具"
+    },
+    {
+      "name": "get_group_info",
+      "display_name": "获取群聊信息",
+      "description": "获取群聊的当前信息（成员数量、最近消息等）",
+      "category": "群聊工具"
+    },
+    {
+      "name": "schedule_moment",
+      "display_name": "安排发布朋友圈",
+      "description": "AI 安排发布朋友圈内容",
+      "category": "朋友圈"
+    },
+    {
+      "name": "cancel_moment",
+      "display_name": "取消朋友圈",
+      "description": "取消尚未发布的朋友圈",
+      "category": "朋友圈"
+    },
+    {
+      "name": "comment_moment",
+      "display_name": "评论朋友圈",
+      "description": "AI 对自己发布的朋友圈添加评论",
+      "category": "朋友圈"
+    },
+    {
+      "name": "like_moment",
+      "display_name": "点赞朋友圈",
+      "description": "AI 给自己的朋友圈点赞或取消点赞",
+      "category": "朋友圈"
+    },
+    {
+      "name": "get_my_moments",
+      "display_name": "查看我的朋友圈",
+      "description": "查看 AI 自己发布的朋友圈列表",
+      "category": "朋友圈"
+    },
+    {
+      "name": "get_moment_detail",
+      "display_name": "查看朋友圈详情",
+      "description": "获取指定朋友圈的详细信息",
+      "category": "朋友圈"
+    },
+    {
+      "name": "get_current_time",
+      "display_name": "获取当前时间",
+      "description": "获取当前系统时间（带时区）",
+      "category": "系统工具"
+    },
+    {
+      "name": "search_knowledge_base",
+      "display_name": "知识库检索",
+      "description": "从知识库中检索相关文档片段（仅在会话启用知识库时可用）",
+      "category": "知识库"
+    },
+    {
+      "name": "get_user_info",
+      "display_name": "查看用户信息",
+      "description": "获取当前会话中用户的个人信息",
+      "category": "用户信息"
+    },
+    {
+      "name": "graph_search_knowledge",
+      "display_name": "知识图谱检索",
+      "description": "从学术知识图谱中检索论文引用链、作者关系、领域分布等（需要Neo4j）",
+      "category": "知识库"
+    },
+    {
+      "name": "flexible_graph_query",
+      "display_name": "灵活图谱查询",
+      "description": "LLM自主构建Cypher查询，灵活检索知识图谱中的任意数据（支持自定义返回字段）",
+      "category": "知识库"
+    },
+    {
+      "name": "compress_context",
+      "display_name": "压缩上下文",
+      "description": "压缩之前工具返回的大量数据，释放上下文空间。支持标记无关内容、压缩为摘要等操作",
+      "category": "系统工具"
+    }
+  ]
+}
+

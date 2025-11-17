@@ -1,0 +1,13 @@
+{
+  "templates": [
+    "werewolf-game.json",
+    "daily-chat.json",
+    "debate.json",
+    "quiet-group.json",
+    "learning-session.json",
+    "academic-discussion.json"
+  ],
+  "version": "1.0.0",
+  "description": "群聊策略配置模板库"
+}
+

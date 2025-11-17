@@ -1,0 +1,478 @@
+.authContainer {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  height: calc(var(--real-vh, 1vh) * 100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary) !important;
+  overflow: hidden;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  background: var(--bg-card) !important;
+  border-radius: 8px;
+  box-shadow: var(--shadow-medium);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.input::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* 确保Ant Design输入框在Auth页面正确应用深色主题 */
+.authCard :global(.ant-input),
+.authCard :global(.ant-input-affix-wrapper) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+.authCard :global(.ant-input:hover),
+.authCard :global(.ant-input-affix-wrapper:hover) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+}
+
+.authCard :global(.ant-input:focus),
+.authCard :global(.ant-input-affix-wrapper-focused) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.authCard :global(.ant-input::placeholder) {
+  color: var(--input-placeholder) !important;
+}
+
+.authCard :global(.ant-input-password) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+.authCard :global(.ant-input-password:hover) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+}
+
+.authCard :global(.ant-input-password:focus) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.authCard :global(.ant-input-password .ant-input) {
+  background-color: transparent !important;
+  color: var(--input-text) !important;
+}
+
+.authCard :global(.ant-input-password .ant-input:hover) {
+  background-color: transparent !important;
+}
+
+.authCard :global(.ant-input-password .ant-input:focus) {
+  background-color: transparent !important;
+}
+
+.authCard :global(.ant-input-password .ant-input::placeholder) {
+  color: var(--input-placeholder) !important;
+}
+
+.authCard :global(.ant-input-password .anticon) {
+  color: var(--text-secondary) !important;
+}
+
+.authCard :global(.ant-input-password .anticon:hover) {
+  color: var(--text-primary) !important;
+}
+
+/* 输入框前缀图标颜色 */
+.authCard :global(.ant-input-prefix) {
+  color: var(--text-secondary) !important;
+}
+
+.authCard :global(.ant-input-prefix .anticon) {
+  color: var(--text-secondary) !important;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: var(--primary-hover);
+}
+
+.links {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.tips {
+  text-align: center;
+  margin: 16px 0;
+  padding: 12px;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--border-secondary);
+}
+
+.tips p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.tips p:first-child {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.links a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 576px) {
+  .authCard {
+    margin: 0 16px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .authCard {
+    margin: 0 32px;
+  }
+}
+
+/* 平板端样式 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .authCard {
+    max-width: 480px;
+  }
+}
+
+/* 电脑端样式 */
+@media (min-width: 1025px) {
+  .authCard {
+    max-width: 420px;
+  }
+}
+
+/* 深色主题下的Auth页面样式 */
+[data-theme="dark"] .authCard {
+  background: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* 确保深色主题下输入框容器也是深色 */
+[data-theme="dark"] .authContainer {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* 强制覆盖所有可能的背景色 */
+[data-theme="dark"] .authContainer,
+[data-theme="dark"] .authCard {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .authCard {
+  background-color: var(--bg-card) !important;
+}
+
+/* 覆盖Ant Design Card组件的默认样式 */
+[data-theme="dark"] .authCard :global(.ant-card) {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .authCard :global(.ant-card-body) {
+  background-color: var(--bg-card) !important;
+}
+
+/* 确保所有Card相关元素都使用深色主题 */
+[data-theme="dark"] :global(.ant-card) {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] :global(.ant-card-body) {
+  background-color: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .title {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .button {
+  background-color: var(--primary-color) !important;
+  color: var(--text-inverse) !important;
+}
+
+[data-theme="dark"] .button:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+[data-theme="dark"] .links a {
+  color: var(--primary-color) !important;
+}
+
+/* Form.Item 深色主题适配 */
+.authCard :global(.ant-form-item-label > label) {
+  color: var(--text-primary) !important;
+}
+
+.authCard :global(.ant-form-item-explain-error) {
+  color: var(--error-color) !important;
+}
+
+.authCard :global(.ant-form-item-has-error .ant-input) {
+  border-color: var(--error-color) !important;
+}
+
+.authCard :global(.ant-form-item-has-error .ant-input-password) {
+  border-color: var(--error-color) !important;
+} 
+
+.authCard :global(.ant-input-affix-wrapper:focus-within) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Ensure inner input inherits themed colors inside affix wrappers */
+.authCard :global(.ant-input-affix-wrapper) :global(input.ant-input) {
+  background-color: transparent !important;
+  color: var(--input-text) !important;
+}
+
+.authCard :global(.ant-input-affix-wrapper) :global(input.ant-input::placeholder) {
+  color: var(--input-placeholder) !important;
+}
+
+/* Suffix icon colors for password and affix wrappers */
+.authCard :global(.ant-input-suffix),
+.authCard :global(.ant-input-password-icon) {
+  color: var(--text-secondary) !important;
+}
+
+.authCard :global(.ant-input-suffix .anticon),
+.authCard :global(.ant-input-password-icon .anticon) {
+  color: var(--text-secondary) !important;
+}
+
+.authCard :global(.ant-input-suffix .anticon:hover),
+.authCard :global(.ant-input-password-icon .anticon:hover) {
+  color: var(--text-primary) !important;
+} 
+
+.authCard :global(.ant-form-item-explain),
+.authCard :global(.ant-form-item-explain-connected) {
+  display: none !important;
+}
+
+/* Keep error border styles if validation failed, but no inline text */
+.authCard :global(.ant-form-item-has-error .ant-input),
+.authCard :global(.ant-form-item-has-error .ant-input-affix-wrapper),
+.authCard :global(.ant-form-item-has-error .ant-input-password) {
+  border-color: var(--error-color) !important;
+}
+
+/* 欢迎页面样式 */
+.welcomeContent {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.welcomeText {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.welcomeButton {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.signUp {
+  display: flex;
+  justify-content: flex-end; /* 将按钮靠右对齐 */
+  align-items: center;
+  position: absolute; /* 脱离文档流，便于定位在右上角 */
+  top: 20px; /* 距离顶部的距离，可根据需要调整 */
+  right: 20px; /* 距离右侧的距离，可根据需要调整 */
+  gap: 10px; /* 按钮之间的间距，可根据需要调整 */
+  z-index: 10; /* 确保按钮在其他内容上方 */
+}
+
+.welcomeButton:not(.ant-btn-primary) {
+  background-color: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.welcomeButton:not(.ant-btn-primary):hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* 模态框样式 */
+:global(.ant-modal) {
+  border-radius: 8px;
+}
+
+:global(.ant-modal-header) {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-primary);
+  border-radius: 8px 8px 0 0;
+}
+
+:global(.ant-modal-title) {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+:global(.ant-modal-body) {
+  background-color: var(--bg-card);
+  padding: 24px;
+}
+
+:global(.ant-modal-close) {
+  color: var(--text-secondary);
+}
+
+:global(.ant-modal-close:hover) {
+  color: var(--text-primary);
+}
+
+/* 模态框内表单样式 */
+:global(.ant-modal .ant-form-item) {
+  margin-bottom: 20px;
+}
+
+:global(.ant-modal .ant-input),
+:global(.ant-modal .ant-input-affix-wrapper),
+:global(.ant-modal .ant-input-password) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--input-text) !important;
+}
+
+:global(.ant-modal .ant-input:hover),
+:global(.ant-modal .ant-input-affix-wrapper:hover),
+:global(.ant-modal .ant-input-password:hover) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+}
+
+:global(.ant-modal .ant-input:focus),
+:global(.ant-modal .ant-input-affix-wrapper:focus),
+:global(.ant-modal .ant-input-password:focus) {
+  background-color: var(--input-bg) !important;
+  border-color: var(--input-border-focus) !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+:global(.ant-modal .ant-input::placeholder),
+:global(.ant-modal .ant-input-password .ant-input::placeholder) {
+  color: var(--input-placeholder) !important;
+}
+
+:global(.ant-modal .ant-input-prefix),
+:global(.ant-modal .ant-input-suffix) {
+  color: var(--text-secondary) !important;
+}
+
+:global(.ant-modal .ant-input-prefix .anticon),
+:global(.ant-modal .ant-input-suffix .anticon) {
+  color: var(--text-secondary) !important;
+}
+
+:global(.ant-modal .ant-input-prefix .anticon:hover),
+:global(.ant-modal .ant-input-suffix .anticon:hover) {
+  color: var(--text-primary) !important;
+}
+
+/* 模态框按钮样式 */
+:global(.ant-modal .ant-btn-primary) {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+:global(.ant-modal .ant-btn-primary:hover) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* 模态框链接样式 */
+:global(.ant-modal .links a) {
+  color: var(--primary-color);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+:global(.ant-modal .links a:hover) {
+  color: var(--primary-hover);
+  text-decoration: underline;
+} 
+

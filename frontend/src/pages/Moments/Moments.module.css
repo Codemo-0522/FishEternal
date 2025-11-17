@@ -1,0 +1,571 @@
+/* 朋友圈页面布局 */
+.momentsLayout {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.momentsContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  background: var(--bg-secondary);
+  align-items: center;
+}
+
+/* 头部 */
+.header {
+  height: 56px;
+  border-bottom: 1px solid var(--border-secondary);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+.headerContent {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.backButton {
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  color: var(--primary-color);
+  background: var(--bg-secondary);
+}
+
+/* 标签页容器 */
+.tabsContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  width: 100%;
+  max-width: 800px;
+}
+
+/* 朋友圈标签页样式覆盖 */
+.momentsTabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.momentsTabs :global(.ant-tabs-nav) {
+  background: var(--bg-primary);
+  margin: 0;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.momentsTabs :global(.ant-tabs-tab) {
+  color: var(--text-secondary);
+}
+
+.momentsTabs :global(.ant-tabs-tab-active) {
+  color: var(--primary-color);
+}
+
+.momentsTabs :global(.ant-tabs-ink-bar) {
+  background: var(--primary-color);
+}
+
+.momentsTabs :global(.ant-tabs-content-holder) {
+  flex: 1;
+  overflow: hidden;
+}
+
+.momentsTabs :global(.ant-tabs-content) {
+  height: 100%;
+}
+
+.momentsTabs :global(.ant-tabs-tabpane) {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 加载和空状态容器 */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--bg-secondary);
+}
+
+.emptyContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: var(--bg-secondary);
+}
+
+/* 滚动容器 */
+.scrollContainer {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  background: var(--bg-secondary);
+}
+
+/* 自定义滚动条样式 */
+.scrollContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* 朋友圈卡片 */
+.momentCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.momentCard:hover {
+  box-shadow: var(--shadow-medium);
+  border-color: var(--border-primary);
+}
+
+/* 内容 */
+.content {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 图片网格 */
+.images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 时间 */
+.time {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 12px;
+}
+
+/* 操作栏 */
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.actions button {
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.actions button:hover {
+  color: var(--primary-color);
+}
+
+/* 点赞按钮特殊样式 */
+.actions button:global(.ant-btn):has(:global(.anticon-heart-filled)) {
+  color: #ff4d4f;
+}
+
+/* 点赞列表区域 */
+.likeSection {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.likeIcon {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.likeUsers {
+  color: var(--text-primary);
+  flex: 1;
+  word-break: break-word;
+}
+
+.likeUsers span {
+  color: var(--primary-color);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.likeUsers span:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* 评论区域 */
+.comments {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.comment {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.commentContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentUser {
+  font-weight: 500;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.deleteCommentBtn {
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 4px;
+  margin-top: 2px;
+}
+
+.comment:hover .deleteCommentBtn {
+  opacity: 1;
+}
+
+.deleteCommentBtn:hover {
+  color: #ff4d4f;
+  transform: scale(1.1);
+}
+
+/* AI 评论标签 */
+.aiTag {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* AI 评论特殊样式 */
+.aiComment {
+  background: var(--ai-comment-bg);
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.commentUser:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.commentTime {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-left: 8px;
+}
+
+/* 评论输入框 */
+.commentInput {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+/* 队列卡片 */
+.queueCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.queueCard:hover {
+  box-shadow: var(--shadow-light);
+  border-color: var(--border-primary);
+}
+
+.queueContent {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.queueStatus {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* 响应式设计 - 平板 */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .momentsTabs :global(.ant-tabs-nav) {
+    padding: 0 16px;
+  }
+
+  .scrollContainer {
+    padding: 16px;
+  }
+}
+
+/* 响应式设计 - 手机 */
+@media (max-width: 768px) {
+  .header {
+    height: 48px;
+    padding: 0 12px;
+  }
+
+  .headerTitle {
+    font-size: 16px;
+  }
+
+  .backButton {
+    font-size: 14px;
+  }
+
+  .momentsTabs :global(.ant-tabs-nav) {
+    padding: 0 12px;
+  }
+
+  .momentsTabs :global(.ant-tabs-tab) {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .scrollContainer {
+    padding: 12px;
+  }
+
+  .momentCard {
+    margin-bottom: 12px;
+    border-radius: 6px;
+  }
+
+  .content {
+    font-size: 14px;
+  }
+
+  .images {
+    gap: 6px;
+  }
+
+  .actions {
+    gap: 12px;
+  }
+
+  .comment {
+    font-size: 13px;
+  }
+}
+
+/* 响应式设计 - 小屏幕手机 */
+@media (max-width: 480px) {
+  .header {
+    height: 44px;
+    padding: 0 10px;
+  }
+
+  .headerTitle {
+    font-size: 15px;
+  }
+
+  .backButton span {
+    display: none; /* 在小屏幕上隐藏"返回"文字，只显示图标 */
+  }
+
+  .momentsTabs :global(.ant-tabs-nav) {
+    padding: 0 10px;
+  }
+
+  .scrollContainer {
+    padding: 10px;
+  }
+
+  .momentCard {
+    margin-bottom: 10px;
+    padding: 12px;
+  }
+
+  .content {
+    font-size: 13px;
+  }
+
+  .time {
+    font-size: 11px;
+  }
+
+  .actions {
+    gap: 10px;
+  }
+
+  .tabsContainer {
+    max-width: 100%;
+  }
+}
+
+/* 平板和桌面端优化 */
+@media (min-width: 769px) {
+  .tabsContainer {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  [data-theme="dark"] .tabsContainer {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 深色模式下的特殊调整 */
+[data-theme="dark"] .momentCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .momentCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .queueCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 图片预览组的主题适配 */
+:global(.ant-image-preview-wrap) {
+  background: var(--bg-overlay);
+}
+
+:global(.ant-image-preview-operations) {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Empty 组件主题适配 */
+.emptyContainer :global(.ant-empty-description) {
+  color: var(--text-tertiary);
+}
+
+/* Tag 组件在深色模式下的调整 */
+[data-theme="dark"] :global(.ant-tag) {
+  background: rgba(24, 144, 255, 0.2);
+  border-color: rgba(24, 144, 255, 0.4);
+}
+
+/* 输入框主题适配 */
+.commentInput :global(.ant-input) {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+
+.commentInput :global(.ant-input:focus) {
+  border-color: var(--input-border-focus);
+  background: var(--input-bg);
+}
+
+.commentInput :global(.ant-input::placeholder) {
+  color: var(--input-placeholder);
+}
+
+/* 按钮主题适配 */
+.commentInput :global(.ant-btn-primary) {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.commentInput :global(.ant-btn-primary:hover) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}

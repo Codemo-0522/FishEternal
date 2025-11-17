@@ -1,0 +1,176 @@
+.avatarCropper {
+  /* 组件容器样式 */
+}
+
+.modalContent {
+  text-align: center;
+  padding: 20px 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* 移动端模态框内容调整 */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 15px 5px;
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 10px 5px;
+    max-height: 90vh;
+  }
+}
+
+.cropModeSelection {
+  margin-bottom: 20px;
+}
+
+/* 移动端模式选择调整 */
+@media (max-width: 480px) {
+  .cropModeSelection {
+    margin-bottom: 15px;
+  }
+}
+
+.cropModeDescription {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.cropArea {
+  display: inline-block;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: none;
+  max-width: 100%;
+  width: auto;
+}
+
+/* 裁剪区域响应式设计 */
+@media (max-width: 768px) {
+  .cropArea {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cropArea {
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+.cropArea.circular {
+  border-radius: 50%;
+  border: 2px solid var(--border-primary);
+}
+
+.cropImage {
+  max-width: 100%;
+  max-height: 50vh;
+  min-height: 200px;
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* 在小屏幕上进一步限制高度 */
+@media (max-height: 600px) {
+  .cropImage {
+    max-height: 35vh;
+    min-height: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cropImage {
+    max-height: 40vh;
+    min-height: 180px;
+  }
+}
+
+.previewSection {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+/* 移动端预览区域调整 */
+@media (max-width: 480px) {
+  .previewSection {
+    margin-top: 15px;
+    padding: 8px;
+  }
+}
+
+.previewTitle {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.previewContainer {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-primary);
+  background-color: var(--bg-primary);
+}
+
+.previewCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.instructions {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 16px;
+  line-height: 1.4;
+  text-align: left;
+  padding: 0 10px;
+}
+
+/* 移动端说明文字调整 */
+@media (max-width: 480px) {
+  .instructions {
+    font-size: 12px;
+    margin-top: 12px;
+    padding: 0 5px;
+  }
+}
+
+/* 深色主题特殊样式 */
+[data-theme="dark"] .cropArea.circular {
+  border-color: var(--border-primary);
+}
+
+[data-theme="dark"] .previewContainer {
+  border-color: var(--border-primary);
+  background-color: var(--bg-primary);
+}
+
+/* 深色主题下的裁剪区域样式 */
+[data-theme="dark"] .cropModeDescription {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .previewSection {
+  background-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .previewTitle {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .instructions {
+  color: var(--text-secondary);
+} 

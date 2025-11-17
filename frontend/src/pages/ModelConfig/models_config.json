@@ -1,0 +1,385 @@
+{
+  "paramDefinitions": {
+    "temperature": {
+      "label": "温度",
+      "description": "控制生成的随机性，值越高越发散",
+      "type": "number"
+    },
+    "top_p": {
+      "label": "Top P",
+      "description": "核采样阈值，控制采样词的累积概率",
+      "type": "number"
+    },
+    "top_k": {
+      "label": "Top K",
+      "description": "每次从概率最高的K个词中采样",
+      "type": "integer"
+    },
+    "presence_penalty": {
+      "label": "存在惩罚",
+      "description": "惩罚已出现过的话题，减少重复",
+      "type": "number"
+    },
+    "frequency_penalty": {
+      "label": "频率惩罚",
+      "description": "惩罚频繁出现的词，降低重复",
+      "type": "number"
+    },
+    "repetition_penalty": {
+      "label": "重复惩罚",
+      "description": "提升或降低生成中重复片段的概率",
+      "type": "number"
+    },
+    "max_tokens": {
+      "label": "最大Tokens",
+      "description": "单次回复的最大生成长度",
+      "type": "integer"
+    }
+  },
+  "defaultParams": [
+    { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+    { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+    { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+  ],
+  "providers": {
+    "deepseek": {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "logo": "/src/static/logo/deepseek.png",
+      "description": "深度求索AI，提供强大的推理能力",
+      "baseUrl": "https://api.deepseek.com",
+      "defaultModel": "deepseek-chat",
+      "officialWebsite": "https://platform.deepseek.com/usage",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "deepseek-chat",
+          "label": "DeepSeek Chat",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "top_k", "min": 1, "max": 100, "step": 1, "default": 50 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "repetition_penalty", "min": 0.5, "max": 2.0, "step": 0.1, "default": 1.1 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "deepseek-coder",
+          "label": "DeepSeek Coder",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "top_k", "min": 1, "max": 100, "step": 1, "default": 50 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "repetition_penalty", "min": 0.5, "max": 2.0, "step": 0.1, "default": 1.1 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "deepseek-reasoner",
+          "label": "DeepSeek Reasoner",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "top_k", "min": 1, "max": 100, "step": 1, "default": 50 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "repetition_penalty", "min": 0.5, "max": 2.0, "step": 0.1, "default": 1.1 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        }
+      ]
+    },
+    "doubao": {
+      "id": "doubao",
+      "name": "豆包",
+      "logo": "/src/static/logo/doubao.png",
+      "description": "字节跳动豆包大模型（火山引擎）",
+      "baseUrl": "https://ark.cn-beijing.volces.com/api/v3",
+      "defaultModel": "doubao-seed-1-6-thinking-250715",
+      "officialWebsite": "https://console.volcengine.com/ark",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "doubao-seed-1-6-thinking-250715",
+          "label": "豆包 Seed 1.6 Thinking",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "doubao-1-5-ui-tars-250428",
+          "label": "豆包 1.5 UI Tars",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": true
+        },
+        {
+          "value": "doubao-1-5-pro-32k-character-250715",
+          "label": "豆包 1.5 Pro 32k Character",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "doubao-1-5-thinking-pro-250415",
+          "label": "豆包 1.5 Thinking Pro",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "doubao-seed-1-6-flash-250615",
+          "label": "豆包 Seed 1.6 Flash 250615",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": true
+        },
+        {
+          "value": "doubao-1-5-thinking-vision-pro-250428",
+          "label": "豆包 1.5 Thinking Vision Pro",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": true,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "doubao-seed-1-6-250615",
+          "label": "豆包 Seed 1.6",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": false,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "doubao-1-5-vision-pro-32k-250115",
+          "label": "豆包 1.5 Vision Pro 32k",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": false,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        },
+        {
+          "value": "doubao-seed-1-6-flash-250715",
+          "label": "豆包 Seed 1.6 Flash 250715",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": false
+        },
+        {
+          "value": "doubao-1-5-pro-32k-250115",
+          "label": "豆包 1.5 Pro 32k",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": false,
+          "params": [
+            { "key": "temperature", "min": 0, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "top_p", "min": 0, "max": 1, "step": 0.01, "default": 0.85 },
+            { "key": "presence_penalty", "min": -2, "max": 2, "step": 0.1, "default": 0.4 },
+            { "key": "frequency_penalty", "min": -2, "max": 2, "step": 0.1, "default": 1.0 },
+            { "key": "max_tokens", "min": 1, "max": 8192, "step": 1, "default": 4096 }
+          ]
+        }
+      ]
+    },
+    "bailian": {
+      "id": "bailian",
+      "name": "通义千问",
+      "logo": "/src/static/logo/bailian.png",
+      "description": "阿里云百炼平台 - 通义千问大模型",
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "defaultModel": "qwen-plus",
+      "officialWebsite": "https://www.aliyun.com/product/bailian",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "qwen-plus",
+          "label": "Qwen Plus",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "siliconflow": {
+      "id": "siliconflow",
+      "name": "硅基流动",
+      "logo": "/src/static/logo/siliconflow.png",
+      "description": "硅基流动 - 多模型免费体验",
+      "baseUrl": "https://api.siliconflow.cn/v1",
+      "defaultModel": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+      "officialWebsite": "https://cloud.siliconflow.cn/",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+          "label": "DeepSeek-R1-0528-Qwen3-8B",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "Qwen/Qwen3-8B",
+          "label": "Qwen3-8B",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "THUDM/GLM-Z1-9B-0414",
+          "label": "GLM-Z1-9B-0414",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+          "label": "DeepSeek-R1-Distill-Qwen-7B",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "THUDM/glm-4-9b-chat",
+          "label": "GLM-4-9B-Chat",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "zhipu": {
+      "id": "zhipu",
+      "name": "智谱清言",
+      "logo": "/src/static/logo/zhipu.png",
+      "description": "智谱AI - GLM大模型",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4/",
+      "defaultModel": "glm-4-plus",
+      "officialWebsite": "https://bigmodel.cn/",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "glm-4-plus",
+          "label": "GLM-4-Plus",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "hunyuan": {
+      "id": "hunyuan",
+      "name": "腾讯混元",
+      "logo": "/src/static/logo/hunyuan.png",
+      "description": "腾讯混元大模型",
+      "baseUrl": "https://api.hunyuan.cloud.tencent.com/v1",
+      "defaultModel": "hunyuan-turbos-latest",
+      "officialWebsite": "https://console.cloud.tencent.com/hunyuan/",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "hunyuan-turbos-latest",
+          "label": "Hunyuan Turbos Latest",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "moonshot": {
+      "id": "moonshot",
+      "name": "月之暗面",
+      "logo": "/src/static/logo/moonshot.png",
+      "logoDark": "/src/static/logo/moonshot_dark.png",
+      "description": "Moonshot AI - Kimi大模型",
+      "baseUrl": "https://api.moonshot.cn/v1",
+      "defaultModel": "kimi-k2-0905-preview",
+      "officialWebsite": "https://platform.moonshot.cn/console/api-keys",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "kimi-k2-0905-preview",
+          "label": "Kimi K2 0905 Preview",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "stepfun": {
+      "id": "stepfun",
+      "name": "阶跃星辰",
+      "logo": "/src/static/logo/stepfun.png",
+      "description": "StepFun - Step大模型",
+      "baseUrl": "https://api.stepfun.com/v1",
+      "defaultModel": "step-1-8k",
+      "officialWebsite": "https://platform.stepfun.com/interface-key",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "step-1-8k",
+          "label": "Step 1 8K",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        }
+      ]
+    },
+    "ollama": {
+      "id": "ollama",
+      "name": "Ollama",
+      "logo": "/src/static/logo/ollama_dark.png",
+      "logoDark": "/src/static/logo/ollama.png",
+      "description": "本地部署的开源大模型",
+      "baseUrl": "http://localhost:11434",
+      "defaultModel": "",
+      "officialWebsite": "https://ollama.com/",
+      "supportsCustomModels": false,
+      "models": []
+    }
+  }
+}

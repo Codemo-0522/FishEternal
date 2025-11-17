@@ -349,14 +349,10 @@ class MessageDispatcher:
             elif msg.sender_type == MemberType.AI and msg.ai_session_id:
                 # 🔥 动态获取AI会话的最新名称
                 try:
-                    # 从chat_sessions或ragflow_sessions获取最新名称
+                    # 从chat_sessions获取最新名称
                     session_doc = await self.db[settings.mongodb_db_name].chat_sessions.find_one(
                         {"_id": msg.ai_session_id}
                     )
-                    if not session_doc:
-                        session_doc = await self.db[settings.mongodb_db_name].ragflow_sessions.find_one(
-                            {"_id": msg.ai_session_id}
-                        )
                     if session_doc:
                         msg.sender_name = session_doc.get("name") or msg.sender_id
                 except Exception as e:
@@ -465,23 +461,10 @@ class MessageDispatcher:
                 actual_session_id = member.member_id.replace("ai_", "") if member.member_id.startswith("ai_") else member.member_id
                 session_ids.append(actual_session_id)
             
-            # 并行查询chat_sessions和ragflow_sessions
-            tasks = [
-                self.db[settings.mongodb_db_name].chat_sessions.find(
-                    {"_id": {"$in": session_ids}}
-                ).to_list(length=None),
-                self.db[settings.mongodb_db_name].ragflow_sessions.find(
-                    {"_id": {"$in": session_ids}}
-                ).to_list(length=None)
-            ]
-            
-            chat_sessions, ragflow_sessions = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            # 处理查询结果
-            if isinstance(chat_sessions, Exception):
-                chat_sessions = []
-            if isinstance(ragflow_sessions, Exception):
-                ragflow_sessions = []
+            # 查询chat_sessions
+            chat_sessions = await self.db[settings.mongodb_db_name].chat_sessions.find(
+                {"_id": {"$in": session_ids}}
+            ).to_list(length=None)
             
             # 创建会话信息映射
             session_info_map = {}
@@ -493,15 +476,6 @@ class MessageDispatcher:
                     "display_name": doc.get("name") or session_id,
                     "avatar": doc.get("role_avatar_url") or ""
                 }
-            
-            # 处理ragflow_sessions结果（如果chat_sessions中没有找到）
-            for doc in ragflow_sessions:
-                session_id = str(doc["_id"])
-                if session_id not in session_info_map:
-                    session_info_map[session_id] = {
-                        "display_name": doc.get("name") or session_id,
-                        "avatar": doc.get("role_avatar_url") or ""
-                    }
             
             # 更新成员信息
             for member in ai_members:

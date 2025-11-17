@@ -1,6 +1,5 @@
 /**
  * 知识库管理页面
- * 独立的知识库系统，与RAGFlow并存
  * 支持创建知识库、上传文档、向量解析、检索测试等功能
  */
 import React, { useState, useEffect, useRef } from 'react';

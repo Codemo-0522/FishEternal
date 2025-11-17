@@ -90,15 +90,10 @@ async def convert_member_to_response(
     if member.member_type == "ai" and member.session_id and db:
         try:
             from ..config import settings
-            # 先查询 chat_sessions
+            # 查询 chat_sessions
             session_doc = await db[settings.mongodb_db_name].chat_sessions.find_one(
                 {"_id": member.session_id}
             )
-            # 如果找不到，再查询 ragflow_sessions
-            if not session_doc:
-                session_doc = await db[settings.mongodb_db_name].ragflow_sessions.find_one(
-                    {"_id": member.session_id}
-                )
             # 使用最新的会话名称
             if session_doc and session_doc.get("name"):
                 nickname = session_doc["name"]

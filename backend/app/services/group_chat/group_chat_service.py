@@ -1022,23 +1022,10 @@ class GroupChatService:
                 session_ids.append(actual_session_id)
                 member_session_map[actual_session_id] = member
             
-            # 并行查询chat_sessions和ragflow_sessions
-            tasks = [
-                self.db[settings.mongodb_db_name].chat_sessions.find(
-                    {"_id": {"$in": session_ids}}
-                ).to_list(length=None),
-                self.db[settings.mongodb_db_name].ragflow_sessions.find(
-                    {"_id": {"$in": session_ids}}
-                ).to_list(length=None)
-            ]
-            
-            chat_sessions, ragflow_sessions = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            # 处理查询结果
-            if isinstance(chat_sessions, Exception):
-                chat_sessions = []
-            if isinstance(ragflow_sessions, Exception):
-                ragflow_sessions = []
+            # 查询chat_sessions
+            chat_sessions = await self.db[settings.mongodb_db_name].chat_sessions.find(
+                {"_id": {"$in": session_ids}}
+            ).to_list(length=None)
             
             # 创建会话信息映射
             session_info_map = {}
@@ -1050,15 +1037,6 @@ class GroupChatService:
                     "display_name": doc.get("name") or session_id,
                     "avatar": doc.get("role_avatar_url") or ""
                 }
-            
-            # 处理ragflow_sessions结果（如果chat_sessions中没有找到）
-            for doc in ragflow_sessions:
-                session_id = str(doc["_id"])
-                if session_id not in session_info_map:
-                    session_info_map[session_id] = {
-                        "display_name": doc.get("name") or session_id,
-                        "avatar": doc.get("role_avatar_url") or ""
-                    }
             
             # 更新成员信息
             for member in ai_members:
@@ -1124,24 +1102,13 @@ class GroupChatService:
             actual_session_id = session_id.replace("ai_", "") if session_id.startswith("ai_") else session_id
             logger.info(f"📝 实际查询的session_id: {actual_session_id}")
             
-            # 先尝试从chat_sessions查找
+            # 从chat_sessions查找
             session_doc = await self.db[settings.mongodb_db_name].chat_sessions.find_one(
                 {"_id": actual_session_id}
             )
             if session_doc:
                 result = session_doc.get("name") or session_id
                 logger.info(f"✅ 从chat_sessions找到: {result}")
-                # 🔥 缓存结果
-                self._set_cache_data(cache_key, self._session_cache, result)
-                return result
-            
-            # 再尝试从ragflow_sessions查找
-            session_doc = await self.db[settings.mongodb_db_name].ragflow_sessions.find_one(
-                {"_id": actual_session_id}
-            )
-            if session_doc:
-                result = session_doc.get("name") or session_id
-                logger.info(f"✅ 从ragflow_sessions找到: {result}")
                 # 🔥 缓存结果
                 self._set_cache_data(cache_key, self._session_cache, result)
                 return result

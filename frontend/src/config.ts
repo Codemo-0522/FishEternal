@@ -5,10 +5,6 @@
 // 2. 在生产环境：前端和后端使用相同协议，避免混合内容错误
 export const API_BASE_URL = '';  // 始终使用空字符串，强制使用相对路径
 
-// RAGFlow 配置
-export const RAGFLOW_BASE_URL = import.meta.env.VITE_RAGFLOW_BASE_URL || '';  // RAGFlow 服务地址
-export const RAGFLOW_DEFAULT_API_KEY = import.meta.env.VITE_RAGFLOW_DEFAULT_API_KEY || '';  // RAGFlow API Key
-
 // 获取完整的API URL
 // 此函数确保所有API请求都使用相对路径，通过Vite代理访问后端
 export const getFullUrl = (path?: string): string => {

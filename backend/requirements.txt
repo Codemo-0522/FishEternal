@@ -105,7 +105,6 @@ python-jose==3.5.0
 python-multipart==0.0.20
 pywin32==311
 PyYAML==6.0.2
-ragflow-sdk==0.20.5
 referencing==0.36.2
 regex==2025.9.18
 requests==2.32.5

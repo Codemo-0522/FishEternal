@@ -29,8 +29,7 @@ async def list_indexes():
     
     collections = [
         ('users', client.fish_chat.users),
-        ('chat_sessions', client.fish_chat.chat_sessions),
-        ('ragflow_sessions', client.fish_chat.ragflow_sessions)
+        ('chat_sessions', client.fish_chat.chat_sessions)
     ]
     
     for collection_name, collection in collections:
@@ -56,8 +55,7 @@ async def drop_indexes():
     
     collections = [
         ('users', client.fish_chat.users),
-        ('chat_sessions', client.fish_chat.chat_sessions),
-        ('ragflow_sessions', client.fish_chat.ragflow_sessions)
+        ('chat_sessions', client.fish_chat.chat_sessions)
     ]
     
     for collection_name, collection in collections:
@@ -88,7 +86,7 @@ async def check_health():
         print(f"🗂️  索引数量: {stats.get('indexes', 0)}")
         
         # 检查各集合状态
-        collections = ['users', 'chat_sessions', 'ragflow_sessions']
+        collections = ['users', 'chat_sessions']
         for collection_name in collections:
             try:
                 collection = client.fish_chat[collection_name]

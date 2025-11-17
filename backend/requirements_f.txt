@@ -47,7 +47,6 @@ langchain-core
 langchain-text-splitters
 langchain-chroma
 langchain-community
-ragflow-sdk
 filelock  # 多进程文件锁（防止 ChromaDB 索引损坏）
 faiss-cpu
 

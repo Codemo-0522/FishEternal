@@ -6624,7 +6624,7 @@ const Chat: React.FC = () => {
            <h1 className={styles.headerTitle}>
              {currentSession 
                  ? currentSession.name 
-                 : '🐋Fish chat'
+                 : '🐋Fish Eternal'
              }
            </h1>
            <div className={styles.headerActions}>

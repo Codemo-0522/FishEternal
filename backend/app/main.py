@@ -6,7 +6,6 @@ import logging
 from .routers import auth, chat, verification, model_config, tts_config, embedding_config, asr_config, asr, moments, group_chat
 from .routers import tool_config as tool_config_router  # 工具配置管理
 from .routers import kb_marketplace  # 知识库广场
-from .routers import knowledge_graph  # 知识图谱
 from .routers import chunking  # 智能分片
 from .utils.init_app import init_app
 from .database import init_indexes, close_db_connection
@@ -46,7 +45,6 @@ app.include_router(moments.router, prefix="/api", tags=["moments"])
 app.include_router(tool_config_router.router, tags=["工具配置"])  # 👈 工具调用全局配置管理
 app.include_router(group_chat.router, tags=["group-chat"])
 app.include_router(kb_marketplace.router, tags=["知识库广场"])  # 知识库共享和拉取
-app.include_router(knowledge_graph.router, tags=["知识图谱"])  # 学术知识图谱
 app.include_router(chunking.router, prefix="/api", tags=["智能分片"])  # 智能分片系统
 
 @app.get("/")
@@ -118,39 +116,6 @@ async def model_capabilities_health():
             "message": f"模型能力管理器异常: {str(e)}"
         }
 
-@app.get("/api/health/neo4j")
-async def neo4j_health():
-    """检查 Neo4j 知识图谱服务状态"""
-    try:
-        from .knowledge_graph.neo4j_client import get_client, is_neo4j_available
-        
-        # 先检查库是否安装
-        if not is_neo4j_available():
-            return {
-                "status": "unavailable",
-                "message": "neo4j 库未安装（可选功能）。安装方式: pip install neo4j"
-            }
-        
-        client = get_client()
-        
-        if not client.is_connected():
-            return {
-                "status": "disconnected",
-                "message": "Neo4j 未连接，请调用 /api/knowledge-graph/initialize 初始化"
-            }
-        
-        stats = client.get_statistics()
-        return {
-            "status": "connected",
-            "statistics": stats,
-            "message": "Neo4j 知识图谱服务运行正常"
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Neo4j 服务异常: {str(e)}"
-        }
-
 @app.get("/api/health/task_queue")
 async def task_queue_health():
     """检查任务队列系统状态"""
@@ -213,16 +178,6 @@ async def startup_event():
         logger.info("✅ 异步任务处理器已启动")
     except Exception as e:
         logger.error(f"❌ 任务处理器启动失败: {str(e)}")
-    
-    # 启动知识图谱任务Worker
-    logger.info("🚀 正在启动知识图谱任务Worker...")
-    from .services.kg_worker import start_worker
-    try:
-        # 启动3个并发Worker
-        await start_worker(max_concurrent_tasks=3)
-        logger.info("✅ 知识图谱Worker已启动（并发数=3）")
-    except Exception as e:
-        logger.error(f"❌ 知识图谱Worker启动失败: {str(e)}")
     
     # ⚡ 后台预加载 ChromaDB 和 FAISS，避免第一个用户请求时卡顿
     from .utils.embedding.vector_store import _preload_chroma_in_background, _preload_faiss_in_background
@@ -344,38 +299,9 @@ async def startup_event():
     # 在后台异步初始化非核心服务
     asyncio.create_task(init_non_critical_services())
     
-    # 🔗 初始化 Neo4j 知识图谱（可选，仅当配置了密码时）
-    async def init_neo4j():
-        """后台初始化 Neo4j 连接"""
-        try:
-            from .knowledge_graph.neo4j_client import get_client, is_neo4j_available
-            
-            # 先检查库是否安装
-            if not is_neo4j_available():
-                logger.info("ℹ️ neo4j 库未安装，知识图谱功能不可用（可选）")
-                return
-            
-            if settings.neo4j_password:  # 只有配置了密码才尝试连接
-                logger.info("🔗 正在初始化 Neo4j 知识图谱...")
-                client = get_client()
-                client.configure(
-                    uri=settings.neo4j_uri,
-                    username=settings.neo4j_username,
-                    password=settings.neo4j_password,
-                    database=settings.neo4j_database
-                )
-                client.connect()
-                logger.info("✅ Neo4j 知识图谱初始化完成")
-            else:
-                logger.info("ℹ️ Neo4j 未配置密码，跳过自动连接")
-        except Exception as e:
-            logger.warning(f"⚠️ Neo4j 初始化失败（不影响服务）: {e}")
-    
-    asyncio.create_task(init_neo4j())
-    
     init_time = time.time() - start_time
     print(f"🚀 应用核心服务启动完成，耗时: {init_time:.2f}秒")
-    print(f"⏳ 后台加载中: ChromaDB、Embedding 模型、MCP 工具、资源管理器、朋友圈发布器、Neo4j 知识图谱...")
+    print(f"⏳ 后台加载中: ChromaDB、Embedding 模型、MCP 工具、资源管理器、朋友圈发布器...")
     
     # 静默模式下，仅输出一条"后端启动成功"到真实stdout
     _silence = (
@@ -393,14 +319,6 @@ async def startup_event():
 async def shutdown_event():
     """应用关闭时的清理操作"""
     print("👋 正在关闭应用...")
-    
-    # 关闭知识图谱Worker
-    try:
-        from .services.kg_worker import stop_worker
-        await stop_worker()
-        print("✅ 知识图谱Worker已关闭")
-    except Exception as e:
-        print(f"⚠️ 关闭知识图谱Worker失败: {e}")
     
     # 关闭异步任务处理器
     try:
@@ -434,15 +352,6 @@ async def shutdown_event():
         print("✅ Redis 连接已关闭")
     except Exception as e:
         print(f"⚠️ 关闭 Redis 连接失败: {e}")
-    
-    # 关闭 Neo4j 连接
-    try:
-        from .knowledge_graph.neo4j_client import get_client
-        client = get_client()
-        client.close()
-        print("✅ Neo4j 连接已关闭")
-    except Exception as e:
-        print(f"⚠️ 关闭 Neo4j 连接失败: {e}")
     
     # 关闭数据库连接
     await close_db_connection()

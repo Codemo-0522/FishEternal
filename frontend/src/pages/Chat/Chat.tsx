@@ -116,27 +116,6 @@ interface ModelSettings {
   modelParams?: Record<string, any>;
 }
 
-// 🆕 知识图谱元数据接口
-export interface GraphMetadata {
-  graph_id: string;
-  tool_name: string;
-  query: string;
-  node_count: number;
-  edge_count: number;
-  created_at: string;
-  nodes: Array<{
-    id: string;
-    label: string;
-    properties: Record<string, any>;
-  }>;
-  edges: Array<{
-    source: string;
-    target: string;
-    relation: string;
-    properties?: Record<string, any>;
-  }>;
-}
-
 // 消息接口
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -144,7 +123,6 @@ export interface ChatMessage {
   timestamp?: string;
   images?: string[];
   reference?: any[];
-  graph_metadata?: GraphMetadata[]; // 🆕 图谱可视化数据
   id?: string;
   create_time?: string;
   sender_id?: string; // 用于群聊中查找发送者头像
@@ -528,10 +506,6 @@ const Chat: React.FC = () => {
   
   // 缓存尚未附着到消息上的引用数据，避免创建空气泡
   const pendingReferenceRef = useRef<any | null>(null);
-  
-  // 🆕 知识图谱可视化相关状态
-  const [graphViewerVisible, setGraphViewerVisible] = useState(false);
-  const [selectedGraphData, setSelectedGraphData] = useState<GraphMetadata[]>([]);
   
   // 记录"修改背景图片"的目标（可能是当前会话，也可能是其他会话）
   const [backgroundUploadTarget, setBackgroundUploadTarget] = useState<
@@ -2545,7 +2519,6 @@ const Chat: React.FC = () => {
               timestamp: msg.timestamp || msg.create_time || msg.created_at,
               images: msg.images,
               reference: msg.reference, // 这里后端已经尽量展开为富引用
-              graph_metadata: msg.graph_metadata, // 🆕 知识图谱元数据
               id: msg.id
             }));
             
@@ -5805,70 +5778,6 @@ const Chat: React.FC = () => {
     }
   };
 
-  // 🆕 知识图谱折叠组件
-  const GraphMetadataCollapsible: React.FC<{ graphMetadata: GraphMetadata[] }> = ({ graphMetadata }) => {
-    const [collapsed, setCollapsed] = React.useState(true);
-    
-    return (
-      <div style={{ marginTop: '12px' }}>
-        <div 
-          style={{ 
-            fontSize: '12px', 
-            color: 'var(--text-secondary)', 
-            marginBottom: collapsed ? '0' : '8px',
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          <NodeIndexOutlined style={{ marginRight: '4px' }} />
-          知识图谱（{graphMetadata.length}）
-          <span style={{ marginLeft: '6px', fontSize: '10px' }}>
-            {collapsed ? '▶' : '▼'}
-          </span>
-        </div>
-        {!collapsed && (
-          <div style={{ marginTop: '8px' }}>
-            {graphMetadata.map((graph, index) => (
-              <div 
-                key={graph.graph_id}
-                className={styles.graphMetadataItem}
-                onClick={() => {
-                  setSelectedGraphData([graph]);
-                  setGraphViewerVisible(true);
-                }}
-              >
-                <NodeIndexOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 500, fontSize: '13px', color: 'var(--text-primary)' }}>
-                    {graph.tool_name || '知识图谱'}
-                  </div>
-                  <div style={{ fontSize: '11px', opacity: 0.7, color: 'var(--text-secondary)' }}>
-                    {graph.node_count} 个节点 • {graph.edge_count} 条关系 • {graph.query}
-                  </div>
-                </div>
-                <Button
-                  size="small"
-                  type="text"
-                  style={{ marginLeft: '4px', color: '#52c41a' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedGraphData([graph]);
-                    setGraphViewerVisible(true);
-                  }}
-                >
-                  查看图谱
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   // 文档引用折叠组件
   const DocumentReferencesCollapsible: React.FC<{ references: any[] }> = ({ references }) => {
     const [collapsed, setCollapsed] = React.useState(true);
@@ -6934,11 +6843,6 @@ const Chat: React.FC = () => {
                           
                           {/* 消息内容 */}
                           {renderMessageContent(msg.content, index, msg.timestamp, msg.reference)}
-                          
-                          {/* 🆕 知识图谱可视化入口 */}
-                          {msg.graph_metadata && msg.graph_metadata.length > 0 && (
-                            <GraphMetadataCollapsible graphMetadata={msg.graph_metadata} />
-                          )}
                           
                           {/* 文档引用列表 */}
                           {msg.reference && msg.reference.length > 0 && (

@@ -117,11 +117,6 @@ class Settings(BaseSettings):
 	max_response_length: int = int(os.getenv("MAX_RESPONSE_LENGTH", "100000"))  # 最大响应长度：默认10万字符（超过视为异常）
 	max_chunk_length: int = int(os.getenv("MAX_CHUNK_LENGTH", "10000"))  # 单个chunk最大长度：默认1万字符
 	
-	# Neo4j知识图谱配置
-	neo4j_uri: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-	neo4j_username: str = os.getenv("NEO4J_USERNAME", "neo4j")
-	neo4j_password: str = os.getenv("NEO4J_PASSWORD", "")
-	neo4j_database: str = os.getenv("NEO4J_DATABASE", "neo4j")
 	
 	@property
 	def redis_url(self) -> str:

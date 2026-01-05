@@ -11,7 +11,7 @@ from typing import List, Optional, Callable, Dict, Any, Tuple
 from dataclasses import dataclass
 from langchain_core.documents import Document
 
-from .async_embedding_wrapper import get_embedding_manager, EmbeddingConfig
+from .async_embedding_wrapper import EmbeddingConfig
 from .task_queue import TaskQueue, EmbeddingTask, TaskPriority
 
 logger = logging.getLogger(__name__)
@@ -41,17 +41,14 @@ class AsyncTextIngestionPipeline:
     
     def __init__(self, config: ProcessingConfig):
         self.config = config
-        self.embedding_manager = None
         
     async def __aenter__(self):
         """异步上下文管理器入口"""
-        self.embedding_manager = await get_embedding_manager()
         return self
         
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """异步上下文管理器出口"""
-        if self.embedding_manager:
-            await self.embedding_manager.cleanup()
+        pass
     
     async def process_document_async(
         self,

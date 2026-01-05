@@ -1,15 +1,41 @@
 import React, { useState } from 'react';
 import { Button, Tooltip } from 'antd';
-import { SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { SunOutlined, MoonOutlined, HeartOutlined } from '@ant-design/icons';
 import { useThemeStore } from '../stores/themeStore';
 
 const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useThemeStore();
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return <SunOutlined />;
+      case 'dark':
+        return <MoonOutlined />;
+      case 'romantic':
+        return <HeartOutlined />;
+      default:
+        return <SunOutlined />;
+    }
+  };
+
+  const getThemeTitle = () => {
+    switch (theme) {
+      case 'light':
+        return '切换到深色主题';
+      case 'dark':
+        return '切换到恋爱系主题';
+      case 'romantic':
+        return '切换到浅色主题';
+      default:
+        return '切换主题';
+    }
+  };
+
   return (
     <Tooltip 
-      title={theme === 'light' ? '切换到深色主题' : '切换到浅色主题'}
+      title={getThemeTitle()}
       trigger={["hover"]}
       open={tooltipOpen}
       onOpenChange={setTooltipOpen}
@@ -20,7 +46,7 @@ const ThemeToggle: React.FC = () => {
     >
       <Button
         type="text"
-        icon={theme === 'light' ? <MoonOutlined /> : <SunOutlined />}
+        icon={getThemeIcon()}
         onClick={() => { toggleTheme(); setTooltipOpen(false); }}
         style={{
           color: 'var(--text-primary)',
@@ -32,4 +58,4 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
-export default ThemeToggle; 
+export default ThemeToggle;

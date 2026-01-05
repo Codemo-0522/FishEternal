@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
 import logging
-from .routers import auth, chat, verification, model_config, tts_config, embedding_config, asr_config, asr, moments, group_chat
+from .routers import auth, chat, verification, model_config, tts_config, embedding_config, asr_config, asr, moments, group_chat, image_generation_config
 from .routers import tool_config as tool_config_router  # 工具配置管理
 from .routers import kb_marketplace  # 知识库广场
 from .routers import chunking  # 智能分片
@@ -40,6 +40,7 @@ app.include_router(model_config.router, prefix="/api", tags=["model-config"])
 app.include_router(tts_config.router, prefix="/api", tags=["tts-config"])
 app.include_router(embedding_config.router, prefix="/api", tags=["embedding-config"])
 app.include_router(asr_config.router, prefix="/api", tags=["asr-config"])
+app.include_router(image_generation_config.router, prefix="/api", tags=["image-generation-config"])
 app.include_router(asr.router, prefix="/api", tags=["asr"])
 app.include_router(moments.router, prefix="/api", tags=["moments"])
 app.include_router(tool_config_router.router, tags=["工具配置"])  # 👈 工具调用全局配置管理
@@ -179,6 +180,13 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ 任务处理器启动失败: {str(e)}")
     
+    # ⚠️ 关键修复：在所有其他导入之前预先导入 sentence_transformers，避免 FAISS 预加载触发 NumPy 循环导入
+    try:
+        from sentence_transformers import SentenceTransformer
+        logger.info("✓ 已在主线程预加载 sentence_transformers")
+    except Exception as e:
+        logger.warning(f"⚠️ sentence_transformers 预导入失败: {e}")
+    
     # ⚡ 后台预加载 ChromaDB 和 FAISS，避免第一个用户请求时卡顿
     from .utils.embedding.vector_store import _preload_chroma_in_background, _preload_faiss_in_background
     _preload_chroma_in_background()
@@ -186,6 +194,7 @@ async def startup_event():
     
     # 🧠 预加载常用 Embedding 模型（可选，根据配置决定）
     try:
+        
         from .services.embedding_manager import get_embedding_manager
         import asyncio
         from concurrent.futures import ThreadPoolExecutor

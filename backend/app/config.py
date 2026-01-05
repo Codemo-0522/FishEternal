@@ -2,18 +2,37 @@ import os
 from pydantic_settings import BaseSettings
 import logging
 from typing import Optional
+from datetime import datetime
+from pathlib import Path
 
 # 日志静默开关（生产或显式开启时全局禁用日志）
 _SILENCE_LOGS = (
 	os.getenv("SILENCE_BACKEND_LOGS", "").strip() in {"1", "true", "True"}
 	or os.getenv("ENV", "").lower() == "production"
 )
+
 if _SILENCE_LOGS:
 	# 禁用所有级别<=CRITICAL的日志（基本等于全关）
 	logging.disable(logging.CRITICAL)
 else:
-	# 配置日志（非静默环境维持原INFO级别）
-	logging.basicConfig(level=logging.INFO)
+	# 配置日志（非静默环境）
+	# 确保 logs 文件夹存在
+	logs_dir = Path(__file__).parent.parent / "logs"
+	logs_dir.mkdir(exist_ok=True)
+	
+	# 使用时间戳命名日志文件
+	timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+	log_file = logs_dir / f"backend_{timestamp}.log"
+	
+	# 配置同时输出到控制台和文件
+	logging.basicConfig(
+		level=logging.INFO,
+		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+		handlers=[
+			logging.StreamHandler(),  # 控制台输出
+			logging.FileHandler(log_file, encoding='utf-8')  # 文件输出
+		]
+	)
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +66,6 @@ class Settings(BaseSettings):
 	minio_access_key: str = os.getenv("MINIO_ACCESS_KEY", "")
 	minio_secret_key: str = os.getenv("MINIO_SECRET_KEY", "")
 	minio_bucket_name: str = os.getenv("MINIO_BUCKET_NAME", "fish-chat")
-	#TTS默认服务商
-	tts_service:str=os.getenv("TTS_SERVICE", "")
 
 	# TTS设置
 	tts_app_id: str = os.getenv("TTS_APP_ID", "")
@@ -94,6 +111,10 @@ class Settings(BaseSettings):
 	stepfun_base_url: str = os.getenv("STEPFUN_BASE_URL", "")
 	stepfun_api_key: str = os.getenv("STEPFUN_API_KEY", "")
 	stepfun_default_model: str = os.getenv("STEPFUN_DEFAULT_MODEL", "")
+
+	# 图片生成服务设置
+	image_generation_provider: str = os.getenv("IMAGE_GENERATION_PROVIDER", "modelscope")  # 图片生成服务提供商
+	modelscope_api_key: str = os.getenv("MODELSCOPE_API_KEY", "")  # ModelScope API Key
 
 	# 邮箱验证配置
 	email_verification: bool = os.getenv("EMAIL_VERIFICATION", "0") == "1"

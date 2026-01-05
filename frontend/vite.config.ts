@@ -13,13 +13,13 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://192.168.178.103:8000',  // 后端地址
+        target: 'http://localhost:8000',  // 后端地址
         changeOrigin: true,
         secure: false,  // 允许代理到 HTTP
         ws: true  // 启用 WebSocket 代理
       },
       '/audio': {
-        target: 'http://192.168.178.103:8000',  // 后端地址
+        target: 'http://localhost:8000',  // 后端地址
         changeOrigin: true,
         secure: false  // 允许代理到 HTTP
       }

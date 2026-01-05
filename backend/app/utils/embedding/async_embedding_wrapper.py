@@ -334,15 +334,15 @@ class EmbeddingManager:
 
 
 # 全局嵌入管理器实例
-_embedding_manager = None
+_async_embedding_manager = None
 
-async def get_embedding_manager() -> EmbeddingManager:
-    """获取全局嵌入管理器"""
-    global _embedding_manager
-    if _embedding_manager is None:
+async def get_async_embedding_manager() -> EmbeddingManager:
+    """获取全局异步嵌入管理器"""
+    global _async_embedding_manager
+    if _async_embedding_manager is None:
         config = EmbeddingConfig()
-        _embedding_manager = EmbeddingManager(config)
-    return _embedding_manager
+        _async_embedding_manager = EmbeddingManager(config)
+    return _async_embedding_manager
 
 
 __all__ = [
@@ -350,5 +350,5 @@ __all__ = [
     "AsyncMiniLMEmbeddings", 
     "AsyncArkEmbeddings",
     "EmbeddingManager",
-    "get_embedding_manager"
+    "get_async_embedding_manager"
 ]

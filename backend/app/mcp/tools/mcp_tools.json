@@ -85,18 +85,6 @@
       "category": "用户信息"
     },
     {
-      "name": "graph_search_knowledge",
-      "display_name": "知识图谱检索",
-      "description": "从学术知识图谱中检索论文引用链、作者关系、领域分布等（需要Neo4j）",
-      "category": "知识库"
-    },
-    {
-      "name": "flexible_graph_query",
-      "display_name": "灵活图谱查询",
-      "description": "LLM自主构建Cypher查询，灵活检索知识图谱中的任意数据（支持自定义返回字段）",
-      "category": "知识库"
-    },
-    {
       "name": "compress_context",
       "display_name": "压缩上下文",
       "description": "压缩之前工具返回的大量数据，释放上下文空间。支持标记无关内容、压缩为摘要等操作",

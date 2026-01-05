@@ -123,7 +123,6 @@ class GroupMessage(BaseModel):
     # AI回复专属
     ai_session_id: Optional[str] = None  # AI对应的会话ID
     reference: List[Dict[str, Any]] = []  # 知识库引用（与普通会话字段名一致）
-    graph_metadata: Optional[Dict[str, Any]] = None  # 🆕 知识图谱可视化元数据
     
     class Config:
         use_enum_values = True

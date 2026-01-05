@@ -199,6 +199,18 @@ class UnifiedOpenAIService(ModelService, BaseModelService):
                 "top_p": 0.7,
             }
         },
+        "modelscope": {
+            "url_suffix": "",
+            "api_key_override": None,
+            "default_headers": {},
+            "supports_vision": True,  # Qwen-VL模型支持图片
+            "save_images_to_minio": True,
+            "fallback_to_non_stream": False,
+            "default_params": {
+                "temperature": 0.7,
+                "top_p": 0.8
+            }
+        },
         "stepfun": {
             "url_suffix": "",  # 已包含在 base_url 中
             "api_key_override": None,
@@ -594,7 +606,8 @@ class UnifiedOpenAIService(ModelService, BaseModelService):
                 chunk_count = 0
                 
                 for chunk in stream:
-                    if chunk.choices[0].delta.content is not None:
+                    # 增加安全检查，确保 choices 列表不为空
+                    if chunk.choices and chunk.choices[0].delta.content is not None:
                         content = chunk.choices[0].delta.content
                         chunk_count += 1
                         

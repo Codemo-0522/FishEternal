@@ -17,7 +17,8 @@ import {
   Alert,
   Tabs,
   Tooltip,
-  Collapse
+  Collapse,
+  Image
 } from 'antd';
 import {
   ExperimentOutlined,
@@ -33,7 +34,8 @@ import {
   SearchOutlined,
   ArrowLeftOutlined,
   DatabaseOutlined,
-  PlusOutlined
+  PlusOutlined,
+  FileImageOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styles from './ModelConfig.module.css';
@@ -59,25 +61,30 @@ const getModelNamesFromConfig = (providerId: string): Array<{ value: string; lab
 };
 
 // 根据主题获取 logo 路径的辅助函数
-const getLogoPath = (providerId: string, theme: 'light' | 'dark'): string => {
+const getLogoPath = (providerId: string, theme: 'light' | 'dark' | 'romantic'): string => {
   const providerConfig = (modelsConfigData as any).providers[providerId];
-  
-  // 如果配置中有logoDark字段，根据主题选择
+
+  // 优先处理有深色主题logo的情况
   if (providerConfig && providerConfig.logoDark) {
-    return theme === 'dark' ? providerConfig.logoDark : providerConfig.logo;
+    // 深色主题使用logoDark，浅色和romantic主题使用默认logo
+    if (theme === 'dark') {
+      return providerConfig.logoDark;
+    } else {
+      return providerConfig.logo;
+    }
   }
-  
-  // 否则使用默认logo
+
+  // 如果没有深色主题logo，所有主题都使用默认logo
   if (providerConfig && providerConfig.logo) {
     return providerConfig.logo;
   }
-  
-  // Embedding providers 的特殊处理
+
+  // 针对特定服务商的硬编码logo（作为后备）
   const logoMap: Record<string, string> = {
     ark: '/src/static/logo/huoshan.png',
     local: '/src/static/logo/locals.png',
   };
-  
+
   return logoMap[providerId] || '/src/static/logo/localmodel.png';
 };
 
@@ -156,6 +163,23 @@ interface AsrProvider {
   defaultModel: string;
   enabled: boolean;
   models: string[];
+  testStatus?: 'idle' | 'testing' | 'success' | 'error';
+  testMessage?: string;
+  officialWebsite?: string;
+}
+
+// 图片生成服务商配置接口
+interface ImageGenerationProvider {
+  id: string;
+  name: string;
+  logo: string;
+  description: string;
+  apiKey: string;
+  enabled: boolean;
+  defaultModel: string;
+  models: Array<{ value: string; label: string }>;
+  supportsCustomModels?: boolean;
+  customModels?: CustomModel[];
   testStatus?: 'idle' | 'testing' | 'success' | 'error';
   testMessage?: string;
   officialWebsite?: string;
@@ -286,6 +310,26 @@ const defaultAsrProviders: AsrProvider[] = [
     ],
     testStatus: 'idle',
     officialWebsite: 'https://cloud.siliconflow.cn/'
+  }
+];
+
+// 默认图片生成配置
+const defaultImageGenerationProviders: ImageGenerationProvider[] = [
+  {
+    id: 'modelscope',
+    name: '魔塔社区（通义）',
+    logo: '/src/static/logo/modelscope.png',
+    description: 'ModelScope（通义万相）图片生成服务',
+    apiKey: '',
+    enabled: false,
+    defaultModel: 'Qwen/Qwen-Image-2512',
+    models: [
+      { value: 'Qwen/Qwen-Image-2512', label: 'Qwen-Image-2512' }
+    ],
+    supportsCustomModels: true,
+    customModels: [],
+    testStatus: 'idle',
+    officialWebsite: 'https://www.modelscope.cn/models/Qwen/Qwen-Image-2512/summary'
   }
 ];
 
@@ -500,6 +544,21 @@ const ModelConfig: React.FC = () => {
   const [asrForm] = Form.useForm();
   const [showAsrApiKey, setShowAsrApiKey] = useState(false); // ASR API密钥显示状态
 
+  // 图片生成配置状态
+  const [imageGenerationProviders, setImageGenerationProviders] = useState<ImageGenerationProvider[]>(defaultImageGenerationProviders);
+  const [imageGenerationModalVisible, setImageGenerationModalVisible] = useState(false);
+  const [currentImageGenerationProvider, setCurrentImageGenerationProvider] = useState<ImageGenerationProvider | null>(null);
+  const [testingImageGenerationProvider, setTestingImageGenerationProvider] = useState<string | null>(null);
+  const [defaultImageGenerationProviderId, setDefaultImageGenerationProviderId] = useState<string>('');
+  const [imageGenerationForm] = Form.useForm();
+  const [showImageGenerationApiKey, setShowImageGenerationApiKey] = useState(false);
+  const [customImageModels, setCustomImageModels] = useState<CustomModel[]>([]);
+  const [customImageModelId, setCustomImageModelId] = useState('');
+  const [customImageModelDisplayName, setCustomImageModelDisplayName] = useState('');
+  const [imageTestPromptModalVisible, setImageTestPromptModalVisible] = useState(false);
+  const [testImagePrompt, setTestImagePrompt] = useState('a fish'); // 默认提示词
+  const [testImageData, setTestImageData] = useState<string | null>(null);
+
   // 确保 URL 有 http 协议
   const ensureHttpProtocol = useCallback((url: string): string => {
     const trimmed = url.trim();
@@ -615,6 +674,8 @@ const ModelConfig: React.FC = () => {
     loadDefaultEmbedding();
     loadAsrConfigs();
     loadDefaultAsr();
+    loadImageGenerationConfigs();
+    loadDefaultImageGeneration();
   }, []);
 
   const loadConfigs = async () => {
@@ -991,6 +1052,8 @@ const ModelConfig: React.FC = () => {
           setShowEmbeddingApiKey(true);
         } else if (activeTab === 'asr') {
           setShowAsrApiKey(true);
+        } else if (activeTab === 'imageGeneration') {
+          setShowImageGenerationApiKey(true);
         }
         setPasswordModalVisible(false);
         passwordForm.resetFields();
@@ -1790,6 +1853,104 @@ const ModelConfig: React.FC = () => {
     }
   };
 
+  // 加载图片生成配置
+  const handleShowImageGenerationApiKey = () => {
+    if (showImageGenerationApiKey) {
+      setShowImageGenerationApiKey(false);
+    } else {
+      setPasswordModalVisible(true);
+    }
+  };
+
+  const loadImageGenerationConfigs = async () => {
+    setLoading(true);
+    try {
+      const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+      const token = authState.state?.token;
+
+      const response = await fetch('/api/image-generation-config/user', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.configs) {
+        const updatedProviders = defaultImageGenerationProviders.map(provider => {
+          const userConfig = result.configs[provider.id];
+          if (userConfig) {
+            return {
+              ...provider,
+              apiKey: userConfig.api_key || provider.apiKey,
+              enabled: userConfig.enabled !== undefined ? userConfig.enabled : provider.enabled,
+              defaultModel: userConfig.default_model || provider.defaultModel,
+              customModels: userConfig.custom_models || provider.customModels,
+            };
+          }
+          return provider;
+        });
+        setImageGenerationProviders(updatedProviders);
+      }
+    } catch (error) {
+      console.error('加载图片生成配置失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 加载默认图片生成服务
+  const loadDefaultImageGeneration = async () => {
+    try {
+      const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+      const token = authState.state?.token;
+
+      const response = await fetch('/api/image-generation-config/default', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      if (result.success && result.provider_id) {
+        setDefaultImageGenerationProviderId(result.provider_id);
+      }
+    } catch (error) {
+      console.error('加载默认图片生成服务失败:', error);
+    }
+  };
+
+  // 设置默认图片生成服务
+  const setDefaultImageGeneration = async (providerId: string) => {
+    try {
+      const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+      const token = authState.state?.token;
+
+      const response = await fetch('/api/image-generation-config/default?provider_id=' + providerId, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        message.success('默认图片生成服务设置成功');
+        setDefaultImageGenerationProviderId(providerId);
+      } else {
+        message.error('设置默认图片生成服务失败: ' + result.message);
+      }
+    } catch (error) {
+      console.error('设置默认图片生成服务失败:', error);
+      message.error('设置默认图片生成服务失败');
+    }
+  };
+
   // 打开ASR配置模态框
   const openAsrConfigModal = (provider: AsrProvider) => {
     setCurrentAsrProvider(provider);
@@ -1946,6 +2107,216 @@ const ModelConfig: React.FC = () => {
       console.error('保存ASR配置失败:', error);
       message.error('保存ASR配置失败');
     }
+  };
+
+  // 打开图片生成配置模态框
+  const openImageGenerationConfigModal = (provider: ImageGenerationProvider) => {
+    setCurrentImageGenerationProvider(provider);
+    imageGenerationForm.setFieldsValue({
+      apiKey: provider.apiKey,
+      enabled: provider.enabled,
+      defaultModel: provider.defaultModel
+    });
+    if (provider.supportsCustomModels) {
+      setCustomImageModels(provider.customModels || []);
+    } else {
+      setCustomImageModels([]);
+    }
+    setCustomImageModelId('');
+    setCustomImageModelDisplayName('');
+    setImageGenerationModalVisible(true);
+    setShowImageGenerationApiKey(false);
+  };
+
+  // 关闭图片生成模态框
+  const closeImageGenerationModal = () => {
+    setImageGenerationModalVisible(false);
+    if (currentImageGenerationProvider) {
+      setImageGenerationProviders(prev => prev.map(p => 
+        p.id === currentImageGenerationProvider.id 
+          ? { ...p, testStatus: 'idle', testMessage: undefined }
+          : p
+      ));
+    }
+    setCurrentImageGenerationProvider(null);
+    imageGenerationForm.resetFields();
+    setShowImageGenerationApiKey(false);
+    setCustomImageModels([]);
+    setTestImageData(null); // 关闭时清空图片
+  };
+
+  // 打开图片生成测试的提示词输入框
+  const openImageGenerationTestModal = async () => {
+    try {
+      // 先验证表单，确保拿到最新配置
+      await imageGenerationForm.validateFields();
+      setImageTestPromptModalVisible(true);
+      setTestImageData(null); // 打开时清空旧图片
+    } catch (error) {
+      message.warning('请先完成配置项');
+    }
+  };
+
+  // 执行图片生成测试
+  const handleImageGenerationTest = async () => {
+    if (!currentImageGenerationProvider || !testImagePrompt) return;
+
+    setImageTestPromptModalVisible(false);
+    setTestingImageGenerationProvider(currentImageGenerationProvider.id);
+    setCurrentImageGenerationProvider(prev => prev ? { ...prev, testStatus: 'testing', testMessage: '正在生成图片...' } : null);
+
+    try {
+      const values = await imageGenerationForm.validateFields();
+      const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+      const token = authState.state?.token;
+
+      const payload = {
+        config: {
+          id: currentImageGenerationProvider.id,
+          api_key: values.apiKey,
+          enabled: values.enabled,
+          default_model: values.defaultModel,
+          models: getFullImageModelList(currentImageGenerationProvider).map(m => m.value),
+          custom_models: customImageModels
+        },
+        prompt: testImagePrompt
+      };
+
+      const response = await fetch(`/api/image-generation-config/test/${currentImageGenerationProvider.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        message.success('图片生成测试成功');
+        const updatedStatus = { testStatus: 'success' as const, testMessage: result.message };
+        setCurrentImageGenerationProvider(prev => prev ? { ...prev, ...updatedStatus } : null);
+        setTestImageData(result.image_data);
+      } else {
+        const errorMessage = result.detail || '图片生成失败';
+        message.error(errorMessage);
+        const updatedStatus = { testStatus: 'error' as const, testMessage: errorMessage };
+        setCurrentImageGenerationProvider(prev => prev ? { ...prev, ...updatedStatus } : null);
+        setTestImageData(null);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      message.error(`测试请求失败: ${errorMessage}`);
+      const updatedStatus = { testStatus: 'error' as const, testMessage: `请求失败: ${errorMessage}` };
+      setCurrentImageGenerationProvider(prev => prev ? { ...prev, ...updatedStatus } : null);
+      setTestImageData(null);
+    } finally {
+      setTestingImageGenerationProvider(null);
+    }
+  };
+
+  // 自动保存图片生成配置（Switch切换时触发）
+  const autoSaveImageGenerationProvider = () => {
+    setTimeout(() => {
+      saveImageGenerationProvider();
+    }, 0);
+  };
+
+  // 保存图片生成配置
+  const saveImageGenerationProvider = async () => {
+    if (!currentImageGenerationProvider) return;
+
+    try {
+      const values = await imageGenerationForm.validateFields();
+      const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+      const token = authState.state?.token;
+
+      const configData = {
+        id: currentImageGenerationProvider.id,
+        api_key: values.apiKey,
+        enabled: values.enabled,
+        default_model: values.defaultModel,
+        models: currentImageGenerationProvider.models.map(m => m.value),
+        custom_models: currentImageGenerationProvider.supportsCustomModels ? customImageModels : undefined
+      };
+
+      const response = await fetch(`/api/image-generation-config/user/${currentImageGenerationProvider.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(configData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        message.success(`${currentImageGenerationProvider.name}配置已保存`);
+        
+        setImageGenerationProviders(prev => prev.map(p => 
+          p.id === currentImageGenerationProvider.id 
+            ? { 
+                ...p, 
+                apiKey: values.apiKey,
+                enabled: values.enabled,
+                defaultModel: values.defaultModel,
+                customModels: currentImageGenerationProvider.supportsCustomModels ? customImageModels : undefined
+              }
+            : p
+        ));
+        
+        closeImageGenerationModal();
+      } else {
+        message.error(`保存配置失败: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('保存图片生成配置失败:', error);
+      message.error('保存图片生成配置失败');
+    }
+  };
+
+  // 添加自定义图片生成模型
+  const addCustomImageModel = () => {
+    if (!customImageModelId.trim() || !customImageModelDisplayName.trim()) {
+      message.warning('请输入模型ID和显示名称');
+      return;
+    }
+    if (customImageModels.some(m => m.id === customImageModelId.trim())) {
+      message.warning('该模型ID已存在');
+      return;
+    }
+    const newModel: CustomModel = {
+      id: customImageModelId.trim(),
+      displayName: customImageModelDisplayName.trim(),
+      supportsImage: false // 图片生成模型此项无意义，设为false
+    };
+    setCustomImageModels([...customImageModels, newModel]);
+    setCustomImageModelId('');
+    setCustomImageModelDisplayName('');
+    message.success('添加成功');
+  };
+
+  // 删除自定义图片生成模型
+  const deleteCustomImageModel = (modelId: string) => {
+    setCustomImageModels(customImageModels.filter(m => m.id !== modelId));
+    const currentDefaultModel = imageGenerationForm.getFieldValue('defaultModel');
+    if (currentDefaultModel === modelId) {
+      imageGenerationForm.setFieldsValue({ defaultModel: '' });
+    }
+    message.success('删除成功');
+  };
+
+  // 获取完整图片生成模型列表
+  const getFullImageModelList = (provider: ImageGenerationProvider): Array<{ value: string; label: string }> => {
+    if (!provider) return [];
+    const configModels = provider.models || [];
+    const customModelOptions = (customImageModels || []).map(cm => ({
+      value: cm.id,
+      label: `${cm.displayName} (自定义)`
+    }));
+    return [...configModels, ...customModelOptions];
   };
 
   // 筛选音色
@@ -2129,6 +2500,60 @@ const ModelConfig: React.FC = () => {
     );
   };
 
+  // 渲染图片生成提供商卡片
+  const renderImageGenerationProviderCard = (provider: ImageGenerationProvider) => {
+    const isConfigured = provider.apiKey;
+    const statusIcon = provider.testStatus === 'success' 
+      ? <CheckCircleOutlined style={{ color: '#52c41a' }} />
+      : provider.testStatus === 'error'
+      ? <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+      : null;
+
+    return (
+      <Col xs={12} sm={12} md={8} lg={6} key={provider.id}>
+        <Card
+          hoverable
+          className={styles.providerCard}
+          onClick={() => openImageGenerationConfigModal(provider)}
+          cover={
+            <div className={styles.logoContainer}>
+              {provider.enabled && (
+                <Tag color="green" className={styles.enabledTag}>已启用</Tag>
+              )}
+              <img 
+                alt={provider.name} 
+                src={provider.logo} 
+                className={styles.providerLogo}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="40" fill="%23999"%3E%3F%3C/text%3E%3C/svg%3E';
+                }}
+              />
+            </div>
+          }
+        >
+          <Card.Meta
+            title={
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', flexWrap: 'nowrap' }}>
+                <span>{provider.name}</span>
+                {isConfigured && (
+                  <span className={styles.configuredBadge}>
+                    <CheckCircleOutlined /> 已配置
+                  </span>
+                )}
+                {statusIcon}
+              </div>
+            }
+            description={
+              <Paragraph ellipsis={{ rows: 1 }} style={{ marginBottom: 8 }}>
+                {provider.description}
+              </Paragraph>
+            }
+          />
+        </Card>
+      </Col>
+    );
+  };
+
   // 渲染ASR提供商卡片
   const renderAsrProviderCard = (provider: AsrProvider) => {
     const isConfigured = provider.apiKey && provider.baseUrl;
@@ -2243,6 +2668,15 @@ const ModelConfig: React.FC = () => {
           } 
           key="embedding"
         />
+        <TabPane 
+          tab={
+            <span>
+              <FileImageOutlined />
+              <span style={{ marginLeft: 8 }}>图片生成（Text2Image）</span>
+            </span>
+          } 
+          key="imageGeneration"
+        />
       </Tabs>
 
 
@@ -2321,7 +2755,49 @@ const ModelConfig: React.FC = () => {
         </div>
       )}
 
+      {/* 图片生成测试的提示词输入框 */}
+      <Modal
+        title="图片生成测试"
+        visible={imageTestPromptModalVisible}
+        onOk={handleImageGenerationTest}
+        onCancel={() => setImageTestPromptModalVisible(false)}
+        confirmLoading={testingImageGenerationProvider !== null}
+        okText="开始生成"
+        cancelText="取消"
+        zIndex={1050}
+      >
+        <p>请输入用于测试的提示词：</p>
+        <Input.TextArea
+          rows={4}
+          value={testImagePrompt}
+          onChange={(e) => setTestImagePrompt(e.target.value)}
+          placeholder="例如：一条可爱的鱼"
+        />
+      </Modal>
+
       {/* ASR语音识别配置 */}
+      {/* 图片生成配置 */}
+      {activeTab === 'imageGeneration' && (
+        <div className={styles.tabContent}>
+          <DefaultSelector
+            title="默认图片生成服务："
+            items={imageGenerationProviders}
+            selectedId={defaultImageGenerationProviderId}
+            onSelect={setDefaultImageGeneration}
+            isItemValid={(item) => item.enabled && !!item.apiKey}
+            isMobile={isMobile}
+          />
+
+          <Spin spinning={loading} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div className={styles.asrCardsContainer}> {/* 可以复用asr的样式 */}
+              <Row gutter={[12, 12]}>
+                {imageGenerationProviders.map(provider => renderImageGenerationProviderCard(provider))}
+              </Row>
+            </div>
+          </Spin>
+        </div>
+      )}
+
       {activeTab === 'asr' && (
         <div className={styles.tabContent}>
           {/* 默认ASR选择 */}
@@ -3412,6 +3888,181 @@ const ModelConfig: React.FC = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 图片生成配置模态框 */}
+      <Modal
+        title={
+          <Space>
+            <SettingOutlined />
+            <span>配置 {currentImageGenerationProvider?.name}</span>
+          </Space>
+        }
+        open={imageGenerationModalVisible}
+        onCancel={closeImageGenerationModal}
+        width={700}
+        centered
+        destroyOnClose
+        footer={[
+          <Button
+            key="test"
+            icon={<ExperimentOutlined />}
+            onClick={openImageGenerationTestModal}
+            loading={testingImageGenerationProvider === currentImageGenerationProvider?.id}
+          >
+            测试连接
+          </Button>,
+          <Button key="cancel" onClick={closeImageGenerationModal}>
+            取消
+          </Button>,
+          <Button key="save" type="primary" icon={<SaveOutlined />} onClick={saveImageGenerationProvider}>
+            保存配置
+          </Button>
+        ]}
+      >
+        {currentImageGenerationProvider && (
+          <Form
+            form={imageGenerationForm}
+            layout="vertical"
+            initialValues={{
+              apiKey: currentImageGenerationProvider.apiKey,
+              enabled: currentImageGenerationProvider.enabled,
+              defaultModel: currentImageGenerationProvider.defaultModel
+            }}
+          >
+            <Form.Item
+              label="启用此提供商"
+              name="enabled"
+              valuePropName="checked"
+            >
+              <Switch onChange={autoSaveImageGenerationProvider} />
+            </Form.Item>
+
+            <Form.Item
+              labelCol={{ span: 24 }}
+              label={
+                <Space>
+                  <div className={styles.goToGetApiKey}>
+                    <div>
+                      <span>API密钥</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={showImageGenerationApiKey ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        onClick={handleShowImageGenerationApiKey}
+                      >
+                        {showImageGenerationApiKey ? '隐藏' : '显示'}
+                      </Button>
+                    </div>
+                    <a target="_blank" href={currentImageGenerationProvider?.officialWebsite}>没有API_Key?去创建</a>
+                  </div>
+                </Space>
+              }
+              name="apiKey"
+              rules={[{ required: true, message: '请输入API密钥' }]}
+            >
+              {showImageGenerationApiKey ? (
+                <Input placeholder="sk-..." />
+              ) : (
+                <Input.Password placeholder="sk-..." visibilityToggle={false} />
+              )}
+            </Form.Item>
+
+            <Form.Item
+              label="默认模型"
+              name="defaultModel"
+              rules={[{ required: true, message: '请选择默认模型' }]}
+            >
+              <Select placeholder="选择默认模型">
+                {getFullImageModelList(currentImageGenerationProvider).map((model) => (
+                  <Option key={model.value} value={model.value}>{model.label}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {currentImageGenerationProvider.supportsCustomModels && (
+              <Form.Item label="自定义模型">
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {customImageModels.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      {customImageModels.map((model) => (
+                        <Tag 
+                          key={model.id}
+                          closable
+                          onClose={() => deleteCustomImageModel(model.id)}
+                          color="blue"
+                          style={{ marginBottom: 4 }}
+                        >
+                          {model.displayName} ({model.id})
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                  <Collapse
+                    ghost
+                    items={[
+                      {
+                        key: '1',
+                        label: '添加自定义模型',
+                        children: (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <Input 
+                              placeholder="模型ID"
+                              value={customImageModelId}
+                              onChange={(e) => setCustomImageModelId(e.target.value)}
+                              style={{ flex: '1 1 200px', minWidth: '150px' }}
+                            />
+                            <Input 
+                              placeholder="显示名称"
+                              value={customImageModelDisplayName}
+                              onChange={(e) => setCustomImageModelDisplayName(e.target.value)}
+                              style={{ flex: '1 1 200px', minWidth: '150px' }}
+                            />
+                            <Button 
+                              type="primary"
+                              icon={<PlusOutlined />}
+                              onClick={addCustomImageModel}
+                              style={{ flex: '0 0 auto', minWidth: '80px' }}
+                            >
+                              添加
+                            </Button>
+                          </div>
+                        )
+                      }
+                    ]}
+                  />
+                </Space>
+              </Form.Item>
+            )}
+
+            {currentImageGenerationProvider.testStatus !== 'idle' && currentImageGenerationProvider.testStatus !== 'testing' && (
+              <Alert
+                message={
+                  <span style={{ fontWeight: 'bold' }}>
+                    {currentImageGenerationProvider.testStatus === 'success' ? '✅ 连接测试成功' : '❌ 连接测试失败'}
+                  </span>
+                }
+                description={
+                  <div style={{ 
+                    whiteSpace: 'pre-wrap', 
+                    wordBreak: 'break-all',
+                    maxHeight: '250px',
+                    overflowY: 'auto'
+                  }}>
+                    {currentImageGenerationProvider.testMessage}
+                    {currentImageGenerationProvider.testStatus === 'success' && testImageData && (
+                      <div style={{ marginTop: 8 }}>
+                        <Image width={200} src={testImageData} alt="Generated Image" />
+                      </div>
+                    )}
+                  </div>
+                }
+                type={currentImageGenerationProvider.testStatus === 'success' ? 'success' : 'error'}
+                style={{ marginTop: 16 }}
+              />
+            )}
+          </Form>
+        )}
       </Modal>
     </div>
   );

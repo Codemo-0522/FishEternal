@@ -217,6 +217,116 @@
   --tag-unparsed-border: rgba(255, 255, 255, 0.2);
 }
 
+/* 恋爱系主题 */
+[data-theme="romantic"] {
+  /* RGB 颜色值（用于透明度控制） */
+  --primary-color-rgb: 255, 105, 180;
+  --bg-primary-rgb: 255, 250, 252;
+  --input-bg-rgb: 255, 255, 255;
+  --code-block-bg-rgb: 255, 245, 250;
+  
+  /* 主色调 - 粉色系 */
+  --primary-color: #ff69b4;
+  --primary-hover: #ff85c1;
+  --primary-active: #ff4da6;
+  
+  /* 背景色 - 柔和粉色渐变 */
+  --bg-primary: #fffafc;
+  --bg-secondary: #fff0f6;
+  --bg-tertiary: #ffe6f0;
+  --bg-card: #ffffff;
+  --bg-overlay: rgba(255, 192, 203, 0.3);
+  --bg-input: #ffffff;
+  --bg-modal: #ffffff;
+  --bg-dropdown: #ffffff;
+  --bg-tooltip: #fff0f6;
+  
+  /* 文字颜色 - 温柔色调 */
+  --text-primary: #4a2c3d;
+  --text-secondary: #7d5a6f;
+  --text-tertiary: #a68a9a;
+  --text-disabled: #d4c4cd;
+  --text-inverse: #4a2c3d;
+  --text-placeholder: #d4c4cd;
+  --text-input: #4a2c3d;
+  
+  /* 边框颜色 - 柔和粉色 */
+  --border-primary: #ffc0d9;
+  --border-secondary: #ffd6e7;
+  --border-light: #ffe6f0;
+  --border-input: #ffc0d9;
+  --border-input-focus: #ff69b4;
+  
+  /* 阴影 - 柔和粉色光晕 */
+  --shadow-light: 0 4px 12px rgba(255, 105, 180, 0.15);
+  --shadow-medium: 0 6px 16px rgba(255, 105, 180, 0.2);
+  --shadow-heavy: 0 10px 28px rgba(255, 105, 180, 0.25);
+  
+  /* 状态颜色 - 柔和版本 */
+  --success-color: #ff9ec5;
+  --warning-color: #ffb3d9;
+  --error-color: #ff6b9d;
+  --info-color: #ff85c1;
+  
+  /* 特殊组件颜色 - 粉色系 */
+  --message-bg-user: #ffe6f0;
+  --message-bg-assistant: #fff5fa;
+  --message-border-user: #ff9ec5;
+  --message-border-assistant: #ffd6e7;
+  
+  /* 侧边栏颜色 - 柔和粉色 */
+  --sider-bg: #fff5fa;
+  --sider-border: #ffd6e7;
+  --session-item-bg: transparent;
+  --session-item-hover: #ffe6f0;
+  --session-item-active: #ffc0d9;
+  --session-name: #4a2c3d;
+  --session-count: #a68a9a;
+  
+  /* 输入框颜色 */
+  --input-bg: #ffffff;
+  --input-text: #4a2c3d;
+  --input-border: #ffc0d9;
+  --input-border-focus: #ff69b4;
+  --input-placeholder: #d4c4cd;
+  
+  /* 模态框颜色 */
+  --modal-bg: #ffffff;
+  --modal-header-bg: #fff5fa;
+  --modal-content-bg: #ffffff;
+  --modal-footer-bg: #fff5fa;
+  --modal-border: #ffd6e7;
+  --modal-text: #4a2c3d;
+  --modal-close: #a68a9a;
+  
+  /* 下拉菜单颜色 */
+  --dropdown-bg: #ffffff;
+  --dropdown-item-bg: #ffffff;
+  --dropdown-item-hover: #ffe6f0;
+  --dropdown-text: #4a2c3d;
+  
+  /* 滚动条 - 粉色系 */
+  --scrollbar-track: #ffe6f0;
+  --scrollbar-thumb: #ffc0d9;
+  --scrollbar-thumb-hover: #ff9ec5;
+  
+  /* 代码块颜色 - 柔和粉色 */
+  --code-block-bg: #fff5fa;
+  --code-block-header-bg: rgba(255, 105, 180, 0.08);
+  --code-block-border: rgba(255, 105, 180, 0.15);
+  --code-block-text: #4a2c3d;
+  --code-block-line-number: rgba(74, 44, 61, 0.4);
+  --code-block-line-number-bg: rgba(255, 105, 180, 0.05);
+  
+  /* AI 评论特殊颜色 */
+  --ai-comment-bg: #ffe6f0;
+  
+  /* 未解析标签颜色（恋爱系主题） */
+  --tag-unparsed-bg: rgba(255, 192, 203, 0.15);
+  --tag-unparsed-text: rgba(74, 44, 61, 0.6);
+  --tag-unparsed-border: rgba(255, 105, 180, 0.3);
+}
+
 /* 主题切换动画 */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;

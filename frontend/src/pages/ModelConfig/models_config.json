@@ -369,6 +369,32 @@
         }
       ]
     },
+    "modelscope": {
+      "id": "modelscope",
+      "name": "魔塔社区",
+      "logo": "/src/static/logo/modelscope.png",
+      "description": "ModelScope 魔塔社区 - 开源模型调用服务",
+      "baseUrl": "https://api-inference.modelscope.cn/v1",
+      "defaultModel": "XiaomiMiMo/MiMo-V2-Flash",
+      "officialWebsite": "https://www.modelscope.cn/my/myaccesstoken",
+      "supportsCustomModels": true,
+      "models": [
+        {
+          "value": "XiaomiMiMo/MiMo-V2-Flash",
+          "label": "Xiaomi MiMo V2 Flash",
+          "supportsImage": false,
+          "imageLabel": "📝",
+          "isSpecial": true
+        },
+        {
+          "value": "Qwen/Qwen3-VL-235B-A22B-Instruct",
+          "label": "Qwen3-VL-235B-A22B-Instruct",
+          "supportsImage": true,
+          "imageLabel": "🖼️",
+          "isSpecial": true
+        }
+      ]
+    },
     "ollama": {
       "id": "ollama",
       "name": "Ollama",

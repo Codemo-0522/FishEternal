@@ -18,6 +18,7 @@
     "antd": "^5.12.2",
     "axios": "^1.6.2",
     "highlight.js": "^11.11.1",
+    "live2d-widget": "^3.1.4",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -18,6 +18,7 @@ from .zhipu import ZhipuService
 from .hunyuan import HunyuanService
 from .moonshot import MoonshotService
 from .stepfun import StepfunService
+from .modelscope import ModelScopeService
 from ...mcp.manager import mcp_manager
 from .streaming_manager import streaming_manager, StreamingState
 from .tool_config import tool_config  # 👈 导入全局配置
@@ -151,6 +152,8 @@ class LLMService:
                 current_service = MoonshotService(base_url, api_key, model_name)
             elif model_service == "stepfun":
                 current_service = StepfunService(base_url, api_key, model_name)
+            elif model_service == "modelscope":
+                current_service = ModelScopeService(base_url, api_key, model_name)
             else:
                 raise ValueError(f"不支持的模型服务: {model_service}")
             
@@ -563,6 +566,8 @@ class LLMService:
             return MoonshotService(base_url, api_key, model_name)
         elif model_service == "stepfun":
             return StepfunService(base_url, api_key, model_name)
+        elif model_service == "modelscope":
+            return ModelScopeService(base_url, api_key, model_name)
         return None
     
     def _build_messages(self, system_prompt: str, history: List[Dict[str, Any]], user_message: str) -> List[Dict[str, Any]]:

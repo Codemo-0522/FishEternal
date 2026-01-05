@@ -878,4 +878,69 @@ async def update_user_profile(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="更新失败"
-        ) 
+        )
+
+@router.post("/upload-role-background")
+async def upload_role_background(
+    avatar_data: RoleAvatarUploadRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncIOMotorClient = Depends(get_database)
+):
+    """上传会话背景图"""
+    try:
+        logger.info(
+            f"🖼️ 准备上传会话背景 session_id={avatar_data.session_id} user_id={current_user.id}"
+        )
+        minio_url = minio_client.upload_image(
+            avatar_data.avatar,
+            f"sessions/{avatar_data.session_id}",
+            "role_background",
+            current_user.id
+        )
+        logger.info(f"🖼️ 会话背景已上传到MinIO url={minio_url}")
+
+        if not minio_url:
+            logger.error("❌ 会话背景上传失败，minio_url 为空")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="会话背景上传失败"
+            )
+
+        update_doc = {"$set": {"role_background_url": minio_url, "updated_at": datetime.now().isoformat()}}
+
+        # 更新 chat_sessions
+        result = await db[settings.mongodb_db_name].chat_sessions.update_one({"_id": avatar_data.session_id, "user_id": str(current_user.id)}, update_doc, upsert=False)
+        logger.info(f"🗄️ 更新会话背景 matched={result.matched_count} modified={result.modified_count}")
+
+        return {"background_url": minio_url}
+
+    except Exception as e:
+        logger.error(f"❌ 会话背景上传/写库失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"会话背景上传失败: {str(e)}"
+        )
+
+@router.get("/role-background/{session_id}")
+async def get_role_background(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncIOMotorClient = Depends(get_database)
+):
+    """获取会话背景（base64），从 chat_sessions 查找"""
+    try:
+        doc = await db[settings.mongodb_db_name].chat_sessions.find_one({"_id": session_id, "user_id": str(current_user.id)})
+        if not doc:
+            raise HTTPException(status_code=404, detail="未找到会话")
+        url = doc.get("role_background_url")
+        if not url:
+            raise HTTPException(status_code=404, detail="该会话未设置背景")
+        data_url = minio_client.get_image_base64(url)
+        if not data_url:
+            raise HTTPException(status_code=500, detail="从存储获取背景失败")
+        return {"data_url": data_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取会话背景失败: {e}")
+        raise HTTPException(status_code=500, detail="获取会话背景失败") 

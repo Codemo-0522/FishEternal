@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'romantic';
 
 interface ThemeState {
   theme: Theme;
@@ -20,12 +20,19 @@ export const useThemeStore = create<ThemeState>()(
         // 更新DOM属性
         document.documentElement.setAttribute('data-theme', theme);
         // 更新body背景色
-        document.body.style.backgroundColor = theme === 'dark' ? '#141414' : '#f0f2f5';
+        const bgColors = {
+          light: '#f0f2f5',
+          dark: '#141414',
+          romantic: '#fff5f7'
+        };
+        document.body.style.backgroundColor = bgColors[theme];
       },
       
       toggleTheme: () => {
         const currentTheme = get().theme;
-        const newTheme: Theme = currentTheme === 'light' ? 'dark' : 'light';
+        const themeOrder: Theme[] = ['light', 'dark', 'romantic'];
+        const currentIndex = themeOrder.indexOf(currentTheme);
+        const newTheme: Theme = themeOrder[(currentIndex + 1) % themeOrder.length];
         get().setTheme(newTheme);
       },
       

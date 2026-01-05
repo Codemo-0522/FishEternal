@@ -184,6 +184,7 @@ async def create_session(
             "model_settings": request.model_settings.dict(),
             "system_prompt": request.system_prompt,  # 保存system_prompt
             "context_count": 20,  # 默认上下文数量为20
+            "session_type": "personal",  # 会话类型：personal(传统会话) 或 group(群聊)
             "history": [],
             "moments": [],  # 朋友圈列表（已发布）
             "moment_queue": []  # 朋友圈队列（待发布）
@@ -1040,9 +1041,6 @@ async def websocket_endpoint(
                         except Exception as e:
                             logger.error(f"初始化流式TTS失败: {e}", exc_info=True)
                     
-                    # 🆕 初始化图谱元数据列表
-                    collected_graph_metadata = []
-                    
                     async for chunk in stream_generator:
                         if chunk:
                             # 🎯 检查是否是工具状态消息（特殊格式）
@@ -1073,16 +1071,6 @@ async def websocket_endpoint(
                                     logger.info(f"📚 已接收并发送 MCP 工具引用到前端，条数: {len(refs_data.get('rich', []))}")
                                 except Exception as e:
                                     logger.error(f"解析引用数据失败: {e}")
-                            # 🆕 检查是否是图谱元数据消息
-                            elif chunk.startswith("__GRAPH_METADATA__") and chunk.endswith("__END__"):
-                                # 提取图谱元数据JSON
-                                try:
-                                    graph_json = chunk[18:-7]  # 去掉 __GRAPH_METADATA__ 和 __END__
-                                    graph_data = json.loads(graph_json)
-                                    collected_graph_metadata.extend(graph_data)
-                                    logger.info(f"🎨 已接收图谱元数据: {len(graph_data)} 个图谱")
-                                except Exception as e:
-                                    logger.error(f"解析图谱元数据失败: {e}")
                             else:
                                 # 正常的消息内容
                                 complete_response += chunk  # 累积响应
@@ -1091,6 +1079,9 @@ async def websocket_endpoint(
                                     "type": "message",
                                     "content": chunk
                                 }))
+                                # 关键修复：强制将控制权交还给事件循环，以确保WebSocket消息被及时发送
+                                # 尤其是在日志被禁用的情况下，可以防止输出缓冲
+                                await asyncio.sleep(0)
                                 
                                 # 🎙️ 添加文本到流式TTS会话
                                 if tts_session:
@@ -1135,27 +1126,12 @@ async def websocket_endpoint(
                         # AI回复使用序列号确保在用户消息之后
                         assistant_time = (base_time + timedelta(seconds=1)).isoformat() + 'Z'  # 转换为ISO字符串格式
                         
-                        # 🚫 过滤空图谱：节点和关系同时为0的图谱
-                        filtered_graph_metadata = []
-                        if collected_graph_metadata:
-                            for graph in collected_graph_metadata:
-                                node_count = graph.get("node_count", 0)
-                                edge_count = graph.get("edge_count", 0)
-                                if node_count == 0 and edge_count == 0:
-                                    logger.info(f"🚫 过滤空图谱（0个节点，0条关系）")
-                                else:
-                                    filtered_graph_metadata.append(graph)
-                        
                         ai_message_doc = {
                             "role": "assistant",
                             "content": complete_response,
                             "timestamp": assistant_time,  # 使用ISO字符串格式，便于前后端匹配
                             "reference": final_lean_refs,  # 使用合并后的引用
-                            "graph_metadata": filtered_graph_metadata if filtered_graph_metadata else None,  # 🆕 图谱元数据（已过滤空图谱）
                         }
-                        
-                        if filtered_graph_metadata:
-                            logger.info(f"💾 将保存 {len(filtered_graph_metadata)} 个图谱可视化数据到数据库（已过滤 {len(collected_graph_metadata) - len(filtered_graph_metadata)} 个空图谱）")
                         # 一次性保存用户消息和AI回复，并更新消息数量
                         await db[settings.mongodb_db_name].chat_sessions.update_one(
                             {"_id": session_id},
@@ -1197,11 +1173,6 @@ async def websocket_endpoint(
                         if saved_images and len(saved_images) > 0:
                             done_message["saved_images"] = saved_images
                             logger.info(f"✅ 在完成消息中包含图片信息: {saved_images}")
-                        
-                        # 🆕 如果有图谱元数据，添加到完成消息中（使用过滤后的数据）
-                        if filtered_graph_metadata:
-                            done_message["graph_metadata"] = filtered_graph_metadata
-                            logger.info(f"✅ 在完成消息中包含图谱元数据: {len(filtered_graph_metadata)} 个图谱")
                         
                         await websocket.send_json(jsonable_encoder(done_message))
                     else:

@@ -37,21 +37,18 @@ import {
   ZoomOutOutlined,
   CloseOutlined,
   DatabaseOutlined,
-  RightOutlined,
   CompressOutlined,
   SettingOutlined,
   BgColorsOutlined,
   HeartOutlined,
   TeamOutlined,
   UsergroupAddOutlined,
-  UserAddOutlined,
   ThunderboltOutlined,
   UploadOutlined,
   CrownOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   SwapOutlined,
-  NodeIndexOutlined,
 } from '@ant-design/icons';
 import styles from './Chat.module.css';
 import { useChatStore } from '../../stores/chatStore';
@@ -70,6 +67,8 @@ import { useNavigate } from 'react-router-dom';
 import AvatarCropper from '../../components/AvatarCropper';
 import { VADStatus, type VADStatusType } from '../../components/VADStatus';
 import ThemeToggle from '../../components/ThemeToggle';
+import Live2DModelSelector from '../../components/Live2DModelSelector';
+import Live2DToggle from '../../components/Live2DToggle';
 import ImageCompressor from '../../components/ImageCompressor';
 import ToolConfigPanel from '../../components/chat/ToolConfigPanel';
 import GroupStrategyConfigModal from '../../components/GroupStrategyConfig';
@@ -85,6 +84,7 @@ import hunyuanLogo from '../../static/logo/hunyuan.png';
 import moonshotLogo from '../../static/logo/moonshot_dark.png';
 import moonshotWhiteLogo from '../../static/logo/moonshot.png';
 import stepfunLogo from '../../static/logo/stepfun.png';
+import modelScope from '../../static/logo/modelscope.png';
 import chatWSManager from '../../utils/ChatWSManager';
 import ollamaLogo from '../../static/logo/ollama_dark.png';
 import ollamaWhiteLogo from '../../static/logo/ollama.png';
@@ -314,7 +314,8 @@ const getModelServices = (isDarkTheme: boolean) => [
   { value: 'zhipu', label: '智谱AI', logo: zhipuLogo },
   { value: 'hunyuan', label: '腾讯混元', logo: hunyuanLogo },
   { value: 'moonshot', label: 'Moonshot', logo: isDarkTheme ? moonshotWhiteLogo : moonshotLogo },
-  { value: 'stepfun', label: 'StepFun', logo: stepfunLogo },
+  { value: 'stepfun', label: '阶跃星辰', logo: stepfunLogo },
+  { value: 'modelscope', label: '魔塔社区', logo: modelScope },
   { value: 'ollama', label: 'Ollama', logo: isDarkTheme ? ollamaWhiteLogo : ollamaLogo },
 ] as const;
 
@@ -1590,12 +1591,6 @@ const Chat: React.FC = () => {
     disconnectWebSocket: disconnectGroupWebSocket,
     clearCurrentGroup,
     setCurrentUserId,
-    createGroup,
-    updateGroup,
-    addMember,
-    removeMember,
-    aiGoOnline,
-    aiGoOffline,
     loadMoreMessages: loadMoreGroupMessages
   } = useGroupChatStore();
 
@@ -1789,9 +1784,7 @@ const Chat: React.FC = () => {
   const messages = useMemo(() => {
     if (currentSession?.session_type === 'group' && currentGroupId) {
       // 群聊模式：使用群聊消息，并转换为 ChatMessage 格式
-      const groupMsgs = groupMessages[currentGroupId] || [];
-      const currentGroup = groups.find(g => g.group_id === currentGroupId);
-      
+      const groupMsgs = groupMessages[currentGroupId] || []; 
       return groupMsgs.map((gm: GroupMessage) => {
         // 🔥 修复：在群聊中正确区分消息定位
         // 消息定位逻辑：
@@ -1830,6 +1823,10 @@ const Chat: React.FC = () => {
   const effectiveIsLoading = isGroupChat 
     ? groupMetadata?.isLoading || false
     : isLoadingMore;
+  
+  const effectiveHasMore = isGroupChat
+    ? groupMetadata?.hasMore || false
+    : hasMore;
   
   // 滚动加载器（使用messageListRef作为容器）
   useScrollLoader({
@@ -2480,17 +2477,6 @@ const Chat: React.FC = () => {
                     if (updatedMessages[i].role === 'assistant') {
                       updatedMessages[i] = { ...updatedMessages[i], timestamp: data.assistant_timestamp } as any;
                       console.log('[Chat] 已更新AI消息时间戳:', data.assistant_timestamp);
-                      break;
-                    }
-                  }
-                }
-                
-                // 🆕 如果有 graph_metadata，更新最后一条 AI 消息的图谱元数据
-                if (data.graph_metadata && Array.isArray(data.graph_metadata) && data.graph_metadata.length > 0) {
-                  for (let i = updatedMessages.length - 1; i >= 0; i--) {
-                    if (updatedMessages[i].role === 'assistant') {
-                      updatedMessages[i] = { ...updatedMessages[i], graph_metadata: data.graph_metadata } as any;
-                      console.log('[Chat] 已更新AI消息图谱元数据:', data.graph_metadata.length, '个图谱');
                       break;
                     }
                   }
@@ -3241,6 +3227,11 @@ const Chat: React.FC = () => {
         label: '导出对话数据',
       },
       {
+        key: 'import',
+        icon: <UploadOutlined />,
+        label: '恢复对话数据',
+      },
+      {
         key: 'clear',
         icon: <DeleteOutlined />,
         label: '清空对话',
@@ -3298,6 +3289,8 @@ const Chat: React.FC = () => {
           navigate(`/moments/${session.session_id}`);
         } else if (key === 'export') {
           handleExportChat(session);
+        } else if (key === 'import') {
+          handleImportChat(session);
         } else if (key === 'clear') {
           handleClearChat(session);
         }
@@ -3417,7 +3410,6 @@ const Chat: React.FC = () => {
             </div>
           </div>
         </div>
-
         <div style={{ marginBottom: '16px' }}>
           <div style={{ marginBottom: '8px', fontWeight: 500 }}>正则表达式（每行一个）</div>
           <Input.TextArea
@@ -4959,6 +4951,73 @@ const Chat: React.FC = () => {
     setExportChatModalVisible(true);
   };
 
+  // 恢复对话数据
+  const handleImportChat = (session: ChatSession) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const content = event.target?.result as string;
+          const data = JSON.parse(content);
+
+          // 验证导入的数据格式
+          if (!data.messages || !Array.isArray(data.messages)) {
+            message.error('JSON文件格式不正确，缺少 messages 数组');
+            return;
+          }
+
+          // 准备要发送到后端的数据
+          const importData: any = {};
+          if (data.system?.original_prompt) {
+            importData.system_prompt = data.system.original_prompt;
+          }
+          importData.history = data.messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp, // 如果存在则包含
+          }));
+
+          // 如果导入的JSON包含会话名称，也一并更新
+          if (data.session_name) {
+            importData.name = data.session_name;
+          }
+
+          // 调用后端API
+          const apiUrl = getFullUrl(`/api/chat/sessions/${session.session_id}`);
+          const response = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${useAuthStore.getState().token}`,
+            },
+            body: JSON.stringify(importData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ detail: '未知错误' }));
+            throw new Error(errorData.detail);
+          }
+
+          message.success('对话数据恢复成功！请手动刷新或切换会话以查看更新。');
+
+        } catch (error: any) {
+          console.error('恢复对话失败:', error);
+          message.error(`恢复失败: ${error.message || '请检查文件格式或网络连接'}`);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   // 清空对话（删除该会话的所有历史消息，并由后端清理其中的 MinIO 图片）
   const handleClearChat = (session: ChatSession) => {
     Modal.confirm({
@@ -5523,6 +5582,251 @@ const Chat: React.FC = () => {
     return renderNormalContent(content, references);
   }, [thinkingSectionStates, toggleThinkingSection]);
 
+  // 本地RAG内容渲染，处理片段标识符##N$$
+  const renderRAGFlowContent = (content: string, references: any[]) => {
+    // 容错：没有引用时也能渲染标号，稍后引用到达再通过状态更新填充
+    const safeRefs = Array.isArray(references) ? references : [];
+    
+    // 匹配##数字$$模式的正则表达式
+    const fragmentRegex = /##(\d+)\$\$/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = fragmentRegex.exec(content)) !== null) {
+      // 添加片段标识符之前的文本
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: content.slice(lastIndex, match.index)
+        });
+      }
+
+      // 使用ref_marker查找引用（全局序号，从1开始）
+      const refMarker = parseInt(match[1]);
+      const matchedRef = safeRefs.find(ref => ref.ref_marker === refMarker);
+      
+      parts.push({
+        type: 'reference',
+        content: match[0],
+        index: refMarker, // 使用全局序号作为显示标识
+        reference: matchedRef || null
+      });
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // 添加最后剩余的文本
+    if (lastIndex < content.length) {
+      parts.push({
+        type: 'text',
+        content: content.slice(lastIndex)
+      });
+    }
+
+    // 如果没有找到片段标识符，直接渲染原始内容
+    if (parts.length === 0) {
+      return (
+        <ReactMarkdown
+          components={{
+            code({ className, children }: any) {
+              const codeContent = String(children).replace(/\n+$/, '');
+              const isInline = !className && !codeContent.includes('\n');
+              
+              if (!isInline && (className || codeContent.includes('\n'))) {
+                const language = className?.replace('language-', '') || 'plaintext';
+                return renderCodeBlock(codeContent, language);
+              }
+              
+              return (
+                <code 
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    padding: '2px 4px',
+                    borderRadius: '3px',
+                    fontFamily: 'Monaco, Menlo, Ubuntu Mono, monospace',
+                    fontSize: '0.9em'
+                  }}
+                >
+                  {children}
+                </code>
+              );
+            },
+            p: ({ children }) => <span style={{ whiteSpace: 'normal', display: 'inline' }}>{children}</span>,
+            ol: ({ children }) => <ol style={{ margin: 0, paddingLeft: '1.25em', display: 'inline' }}>{children}</ol>,
+            ul: ({ children }) => <ul style={{ margin: 0, paddingLeft: '1.25em', display: 'inline' }}>{children}</ul>,
+            li: ({ children }) => <li style={{ margin: 0 }}>{children}</li>,
+            a: ({ href, children }) => (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            )
+          }}
+          remarkPlugins={[remarkGfm]}
+        >
+          {content}
+        </ReactMarkdown>
+      );
+    }
+
+    // 渲染包含片段标识符的内容
+    return (
+      <div style={{ display: 'inline' }}>
+        {parts.map((part, index) => {
+          if (part.type === 'text') {
+            return (
+              <ReactMarkdown
+                key={index}
+                components={{
+                  code({ className, children }: any) {
+                    const codeContent = String(children).replace(/\n+$/, '');
+                    const isInline = !className && !codeContent.includes('\n');
+                    
+                    if (!isInline && (className || codeContent.includes('\n'))) {
+                      const language = className?.replace('language-', '') || 'plaintext';
+                      return renderCodeBlock(codeContent, language);
+                    }
+                    
+                    return (
+                      <code 
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          padding: '2px 4px',
+                          borderRadius: '3px',
+                          fontFamily: 'Monaco, Menlo, Ubuntu Mono, monospace',
+                          fontSize: '0.9em'
+                        }}
+                      >
+                        {children}
+                      </code>
+                    );
+                  },
+                  p: ({ children }) => <span style={{ whiteSpace: 'pre-wrap', display: 'inline' }}>{children}</span>,
+                  a: ({ href, children }) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer">
+                      {children}
+                    </a>
+                  )
+                }}
+                remarkPlugins={[remarkGfm]}
+              >
+                {part.content}
+              </ReactMarkdown>
+            );
+          } else if (part.type === 'reference') {
+            return (
+              <Tooltip
+                key={index}
+                title={
+                  part.reference && part.reference.content ? (
+                    <div style={{ 
+                      maxWidth: '90vw', 
+                      background: 'var(--bg-primary)',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-secondary)'
+                    }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: 8, fontSize: '16px', color: 'var(--text-primary)' }}>
+                        📄 {part.reference.document_id || part.reference.metadata?.source || '知识库引用'}
+                      </div>
+                      <div style={{ marginBottom: 8, fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        {(() => {
+                          const score = part.reference?.score;
+                          if (score !== undefined && score !== null) {
+                            const similarity = 1 / (1 + score);
+                            return `📊 相似度: ${ (similarity * 100).toFixed(1) }%`;
+                          }
+                          return '📊 相似度: N/A';
+                        })()}
+                      </div>
+                      <div 
+                        className={styles.referenceContentArea}
+                        style={{ 
+                          maxHeight: 400, 
+                          overflow: 'auto',
+                          overflowX: 'hidden',
+                          fontSize: '14px',
+                          lineHeight: '1.6',
+                          background: 'var(--bg-secondary)',
+                          padding: 12,
+                          borderRadius: 6,
+                          marginTop: 8,
+                          border: '1px solid var(--border-primary)',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'anywhere',
+                          whiteSpace: 'pre-wrap',
+                          color: 'var(--text-primary)'
+                        }}>
+                        {(() => {
+                          let content = '';
+                          try {
+                            if (typeof part.reference.content === 'string') {
+                              try {
+                                const jsonContent = JSON.parse(part.reference.content);
+                                if (jsonContent && typeof jsonContent === 'object') {
+                                  if (jsonContent['0'] && jsonContent['0'].Abstract) {
+                                    content = jsonContent['0'].Abstract.replace(/<[^>]*>/g, '');
+                                  } else if (jsonContent['0'] && jsonContent['0'].Title) {
+                                    content = jsonContent['0'].Title;
+                                  } else {
+                                    content = JSON.stringify(jsonContent, null, 2);
+                                  }
+                                } else {
+                                  content = part.reference.content;
+                                }
+                              } catch {
+                                content = part.reference.content;
+                              }
+                            } else {
+                              content = JSON.stringify(part.reference.content, null, 2);
+                            }
+                          } catch {
+                            try {
+                              content = String(part.reference?.content ?? '');
+                            } catch {
+                              content = '无法显示引用内容';
+                            }
+                          }
+                          
+                          return content;
+                        })()}
+                      </div>
+                    </div>
+                  ) : (() => {
+                    console.warn('⚠️ 引用信息不可用:', { 
+                      index: part.index, 
+                      hasReference: !!part.reference,
+                      referenceKeys: part.reference ? Object.keys(part.reference) : [],
+                      reference: part.reference 
+                    });
+                    return (
+                      <div style={{ padding: '12px', color: 'var(--text-secondary)' }}>
+                        引用信息加载中... (序号 #{part.index})
+                      </div>
+                    );
+                  })()
+                }
+                placement="top"
+                trigger={["hover", "click"]}
+                overlayStyle={{ maxWidth: 720, pointerEvents: 'auto' }}
+                getPopupContainer={() => document.body}
+                mouseEnterDelay={0.08}
+                mouseLeaveDelay={0.2}
+              >
+                <span 
+                  className={styles.referenceIndicator}
+                >
+                  {part.index}
+                </span>
+              </Tooltip>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
+  };
+
   // 仅在代码块外部将 \\n 转换为换行，避免破坏三引号代码块内容
   const decodeOutsideCodeBlocks = (text: string) => {
     const blocks: string[] = [];
@@ -5550,6 +5854,10 @@ const Chat: React.FC = () => {
         // @ts-ignore
         ? references.chunks
         : Object.values(references);
+    }
+    // 如果内容包含 ##N$$ 标记，则按引用渲染（即使暂时没有引用数据也先转换为标号）
+    if (/##\d+\$\$/.test(content)) {
+      return renderRAGFlowContent(content, normalizedRefs);
     }
 
     // 检查是否为JSON字符串
@@ -6558,7 +6866,7 @@ const Chat: React.FC = () => {
             }}
           >
             {/* 懒加载提示 - 企业级优化版 */}
-            {hasMore && (
+            {effectiveHasMore && (
               <div style={{ 
                 textAlign: 'center', 
                 padding: '12px 16px', 
@@ -6570,7 +6878,7 @@ const Chat: React.FC = () => {
                 justifyContent: 'center',
                 gap: '8px'
               }}>
-                {isLoadingMore ? (
+                {effectiveIsLoading ? (
                   <>
                     <span style={{ 
                       display: 'inline-block',
@@ -7526,6 +7834,8 @@ const Chat: React.FC = () => {
               </div>
               <div className={styles.settingCard}>
                 <ThemeToggle />
+                <Live2DModelSelector />
+                <Live2DToggle />
               </div>
               <div className={styles.settingCard}>
                 <div className={styles.settingRow}>
@@ -7876,16 +8186,34 @@ const Chat: React.FC = () => {
                   </div>
 
                   <div className={styles.formItem}>
-                    <div className={styles.formLabel}>知识库提示词（使用 {`{knowledge}`} 占位符）</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <div className={styles.formLabel}>知识库提示词（使用 {`{knowledge}`} 占位符）</div>
+                      <Button 
+                        type="link"
+                        size="small" 
+                        style={{ padding: 0 }}
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/system_prompts/mcp_tools_rules.md');
+                            const content = await response.text();
+                            setKbConfig((prev: any) => ({ ...prev, kb_prompt_template: content }));
+                          } catch (error) {
+                            message.error('加载内置SYSTEM_PROMPT失败');
+                          }
+                        }}
+                      >
+                        使用内置SYSTEM_PROMPT
+                      </Button>
+                    </div>
                     <Input.TextArea
                       value={kbConfig.kb_prompt_template}
                       onChange={(e) => setKbConfig((prev: any) => ({ ...prev, kb_prompt_template: e.target.value }))}
                       rows={6}
-                      placeholder={`在此编写完整提示词，包含 {knowledge} 以插入检索内容。\n首次默认填入当前会话的原始提示词，您可以在合适位置加入 {knowledge}。`}
+                      placeholder={`启用知识库并选择至少一个知识库后，此提示词将覆盖角色默认提示词，并根据以下模式触发RAG：\n1. 硬编码模式：若提示词包含 {knowledge}，系统将强制使用用户原始输入进行检索。此模式不受“知识库检索”工具开关影响。\n2. MCP模式：若“功能”->“工具配置”中的“知识库检索”工具已启用，模型将自主判断是否需要执行RAG。此模式不受 {knowledge} 占位符影响。\n注意：若同时满足两种模式的触发条件，两种RAG流程将并发执行，可能导致信息冗余。`}
                     />
                   </div>
 
-                  {/* 🆕 知识库选择器（支持单选或多选）*/}
+                  {/* 知识库选择器（支持单选或多选）*/}
                   <div className={styles.formItem}>
                     <div className={styles.formLabel}>
                       选择知识库
@@ -9966,9 +10294,12 @@ const ManageGroupModalInline: React.FC<{
                 message="群聊系统提示词"
                 description={
                   <div>
-                    <p style={{ margin: 0 }}>为这个群聊设置专属的系统提示词，定义群聊场景、角色设定或对话规则。</p>
-                    <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#888' }}>
-                      💡 最终系统提示词 = AI原本的系统提示词 + 群聊系统提示词 + 动态群聊信息（成员列表等）
+                    <p>为这个群聊设置专属的场景提示词，定义场景背景、角色设定或对话规则。</p>
+                    <p className={styles.promptHint}>
+                      💡 最终系统提示词 = AI原本的系统提示词 + 场景提示词
+                    </p>
+                    <p className={styles.templateHint}>
+                      🎯 支持模板占位符：<code className={styles.templateTag}>{'{{场景名称}}'}</code> <code className={styles.templateTag}>{'{{在场角色}}'}</code>
                     </p>
                   </div>
                 }

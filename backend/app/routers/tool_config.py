@@ -257,7 +257,17 @@ async def get_available_tools_config(
     
     # 4. 确定启用的工具列表
     if user_config:
-        enabled_tools = user_config.get("enabled_tools", [])
+        # 从数据库获取用户配置的已启用工具
+        stored_enabled_tools = user_config.get("enabled_tools", [])
+        # 获取当前所有合法的工具名称
+        all_tool_names = [tool["name"] for tool in tools_from_json]
+        # 过滤掉已失效的工具，只保留当前仍然存在的工具
+        enabled_tools = [tool for tool in stored_enabled_tools if tool in all_tool_names]
+        
+        # 如果过滤后启用的工具列表与存储的不同，说明有过时工具被清理，记录日志
+        if len(enabled_tools) != len(stored_enabled_tools):
+            removed_tools = [tool for tool in stored_enabled_tools if tool not in all_tool_names]
+            logger.info(f"🧹 用户 {current_user.id} 的配置中包含 {len(removed_tools)} 个已失效的工具，已自动清理: {removed_tools}")
     else:
         # 如果用户没有配置，默认全部启用
         enabled_tools = [tool["name"] for tool in tools_from_json]

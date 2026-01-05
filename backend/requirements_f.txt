@@ -24,8 +24,6 @@ pymongo
 # 内存数据库
 redis
 
-# 知识图谱数据库
-neo4j
 
 # HTTP / 网络与流式
 httpx

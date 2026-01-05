@@ -531,10 +531,10 @@ class MessageDispatcher:
     
     async def _format_members_with_identity(self, members: List[GroupMember]) -> str:
         """
-        为成员列表添加身份标识（仅显示群内角色：群主/管理员）
+        格式化成员列表，只显示角色名称，不显示群主、管理员等标识
         
-        格式：名称1(群主), 名称2(管理员), 名称3, ...
-        例如：玖凝(群主), 苏冉(管理员), 周子扬, 林溪(管理员)
+        格式：名称1, 名称2, 名称3, ...
+        例如：玖凝, 苏冉, 周子扬, 林溪
         
         Args:
             members: 成员列表
@@ -547,17 +547,10 @@ class MessageDispatcher:
         
         formatted_members = []
         
-        # 只显示群内角色身份（群主/管理员），不显示AI的角色设定
+        # 只显示角色名称，不添加任何身份标识
         for member in members:
             display_name = member.display_name or member.member_id
-            
-            # 添加群内角色身份
-            if member.role == MemberRole.OWNER:
-                formatted_members.append(f"{display_name}(群主)")
-            elif member.role == MemberRole.ADMIN:
-                formatted_members.append(f"{display_name}(管理员)")
-            else:
-                formatted_members.append(display_name)
+            formatted_members.append(display_name)
         
         return ", ".join(formatted_members)
     
@@ -571,35 +564,24 @@ class MessageDispatcher:
         """
         格式化上下文为LLM输入格式
         
-        系统提示词由3部分组成：
+        系统提示词由2部分组成：
         1. AI原本的系统提示词（user_system_prompt）
-        2. 用户自定义的群聊系统提示词（group_system_prompt）
-        3. 动态生成的群聊信息（成员列表等）
+        2. 用户自定义的场景提示词（group_system_prompt）
+           - 支持模板占位符：{{场景名称}}、{{在场角色}}
         
         Args:
             context: 群聊上下文
             ai_member: AI成员信息
             user_system_prompt: AI会话的系统提示词（可选）
-            group_system_prompt: 用户为群聊自定义的系统提示词（可选）
+            group_system_prompt: 用户为群聊自定义的场景提示词（可选，支持模板）
         
         Returns:
             (system_prompt, history_messages)
         """
-        # 🎯 为在线成员添加身份标识
+        # 🎯 准备模板变量
         online_members_with_identity = await self._format_members_with_identity(context.online_members)
         
-        # 🎯 第3部分：动态生成的群聊信息
-        group_info = [
-            "",
-            "---",
-            "【当前群聊信息】",
-            f"群聊名称：{context.group_name}",
-            f"成员总数：{context.total_members} 人",
-            f"在线成员：{online_members_with_identity} ({len(context.online_members)} 人在线)",
-            "---",
-        ]
-        
-        # 🔥 拼接3部分系统提示词
+        # 🔥 拼接2部分系统提示词
         prompt_parts = []
         
         # 第1部分：AI原本的系统提示词
@@ -609,12 +591,13 @@ class MessageDispatcher:
             # 如果用户没有配置system_prompt，使用默认身份
             prompt_parts.append(f"你是 {ai_member.display_name}。")
         
-        # 第2部分：群聊自定义系统提示词
+        # 第2部分：群聊自定义场景提示词（支持模板占位符）
         if group_system_prompt and group_system_prompt.strip():
-            prompt_parts.append("\n" + group_system_prompt.strip())
-        
-        # 第3部分：群聊信息
-        prompt_parts.append("\n".join(group_info))
+            # 🎯 替换模板占位符
+            processed_prompt = group_system_prompt.strip()
+            processed_prompt = processed_prompt.replace("{{场景名称}}", context.group_name)
+            processed_prompt = processed_prompt.replace("{{在场角色}}", online_members_with_identity)
+            prompt_parts.append("\n" + processed_prompt)
         
         system_prompt = "\n".join(prompt_parts)
         

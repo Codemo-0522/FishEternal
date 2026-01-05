@@ -185,10 +185,6 @@ class DocumentResponse(BaseModel):
     # 任务进度信息
     progress: float = 0.0  # 进度百分比 (0.0-1.0)
     progress_msg: str = ""  # 进度描述信息
-    # 知识图谱构建状态
-    kg_status: Optional[str] = "not_built"  # not_built, building, success, failed
-    kg_error_message: Optional[str] = None  # 知识图谱构建失败的错误信息
-    kg_built_time: Optional[str] = None  # 知识图谱构建成功的时间
     
     class Config:
         json_schema_extra = {

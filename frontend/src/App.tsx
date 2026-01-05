@@ -9,6 +9,7 @@ import ModelConfig from './pages/ModelConfig/ModelConfig';
 import Moments from './pages/Moments/Moments';
 import KnowledgeBase from './pages/KnowledgeBase/KnowledgeBase';
 import KBMarketplace from './pages/KBMarketplace/KBMarketplace';
+import Live2DWidget from './components/Live2DWidget';
 import './styles/themes.css';
 
 // 受保护的路由组件
@@ -51,8 +52,10 @@ const App: React.FC = () => {
   }
 
   return (
-    <Router>
-      <Routes>
+    <>
+      <Live2DWidget />
+      <Router>
+        <Routes>
         <Route
           path="/"
           element={
@@ -117,8 +120,9 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </>
   );
 };
 

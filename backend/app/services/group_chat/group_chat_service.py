@@ -720,11 +720,8 @@ class GroupChatService:
                 # 🔥 动态获取AI会话的最新名称（确保使用chat_sessions中的最新名称）
                 ai_name = await self._get_ai_display_name(session_id)
                 
-                # 🔥 获取群组所有成员名称（用于精确清洗）
-                all_members = await self.group_manager.get_all_members(context.group_id)
-                member_names = [m.display_name for m in all_members if m.display_name]
-                
-                cleaned_response = self._clean_ai_response(complete_response, ai_name, member_names)
+                # ⚠️ 只清洗当前AI自己的名称前缀，不清洗其他成员的名称
+                cleaned_response = self._clean_ai_response(complete_response, ai_name)
                 
                 # 保存并广播消息
                 ai_message = await self.message_dispatcher.save_message(
@@ -784,21 +781,19 @@ class GroupChatService:
         except Exception as e:
             logger.error(f"❌ AI回复失败: {ai_member_id} | 错误: {e}", exc_info=True)
     
-    def _clean_ai_response(self, content: str, ai_name: str, member_names: List[str]) -> str:
+    def _clean_ai_response(self, content: str, ai_name: str) -> str:
         """
-        清洗AI回复内容，去除模型可能添加的多余标识
+        清洗AI回复内容，只移除当前AI自己的名称前缀
         
         处理策略：
-        1. 循环清洗所有群组成员的名称前缀（支持精确匹配和模糊匹配）
-        2. 优先清洗当前AI自己的名称
-        3. 支持名称简写形式（如 "白淑" → "白淑-大模型数据处理工程师"）
-        4. 支持模糊匹配（如 "舟镜-大模型训练工程师" 匹配 "舟镜-大模型训练师工程师"）
-        5. 保护正文内容中的[]符号和冒号
+        1. 循环清洗当前AI的名称前缀（支持精确匹配和模糊匹配）
+        2. 支持名称简写形式（如 "白淑" → "白淑-大模型数据处理工程师"）
+        3. 支持模糊匹配（如 "舟镜-大模型训练工程师" 匹配 "舟镜-大模型训练师工程师"）
+        4. 保留其他角色的名称前缀（如果模型错误生成，能在前端看出问题）
         
         Args:
             content: 原始回复内容
             ai_name: AI的显示名称
-            member_names: 群组所有成员的显示名称列表（用于精确匹配）
         
         Returns:
             清洗后的内容
@@ -806,9 +801,7 @@ class GroupChatService:
         Examples:
             "[张三]: [张三]: 你好" → "你好" (重复清洗)
             "[张三]: 时间：下午3点" → "时间：下午3点" (保留正文冒号)
-            "[白淑]: 你好" → "你好" (简写形式，ai_name="白淑-大模型数据处理工程师")
-            "[舟镜-大模型训练工程师]: 你好" → "你好" (模糊匹配，ai_name="舟镜-大模型训练师工程师")
-            "[紧急通知]: 请注意" → "[紧急通知]: 请注意" (不在成员名单，不清洗)
+            "[李四]: 你好" → "[李四]: 你好" (保留其他角色的前缀)
         """
         if not content:
             return content
@@ -820,8 +813,8 @@ class GroupChatService:
         max_iterations = 10  # 防止无限循环
         iteration = 0
         
-        # 🎯 构建所有需要清洗的名称列表（AI名称优先）
-        names_to_clean = [ai_name] + [name for name in member_names if name != ai_name]
+        # 🎯 只清洗当前AI自己的名称
+        names_to_clean = [ai_name]
         
         # 🔥 为每个名称生成多种变体（用于匹配不同格式的前缀）
         # 变体包括：

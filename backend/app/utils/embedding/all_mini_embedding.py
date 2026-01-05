@@ -11,7 +11,6 @@ except Exception:
 	print("[错误] 需要安装 sentence-transformers，请先执行: pip install -U sentence-transformers", file=sys.stderr)
 	raise
 
-
 class MiniLMEmbeddings(Embeddings):
 	"""
 	基于 SentenceTransformers 的 all-MiniLM-L6-v2 封装，遵循 LangChain Embeddings 接口。
@@ -66,7 +65,7 @@ class MiniLMEmbeddings(Embeddings):
 				f"加载本地模型失败: {self.model_name_or_path}\n"
 				f"错误信息: {str(e)}\n"
 				f"请确保模型文件完整且格式正确。"
-			)
+			) from e
 		
 		# 控制最大长度
 		if isinstance(self.max_length, int) and self.max_length > 0:

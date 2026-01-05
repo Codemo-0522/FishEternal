@@ -574,86 +574,6 @@ class UniversalStreamingManager:
                 self._pending_references[session_id] = {"rich": [], "lean": []}
                 logger.info(f"🧹 已清空待发送缓存（已发送的ref_id仍保留用于去重）")
             
-            # 🆕 【Redis方案】从Redis提取并发送图谱可视化数据
-            if hasattr(self, '_pending_graph_sessions') and session_id in self._pending_graph_sessions:
-                try:
-                    from app.redis_client import get_redis
-                    from app.utils.llm.graph_viz_cache import GraphVisualizationCache
-                    
-                    redis = await get_redis()
-                    graph_data_raw = await GraphVisualizationCache.get_all_visualizations(redis, session_id)
-                    
-                    if graph_data_raw:
-                        # 转换为前端期望的GraphMetadata格式
-                        graph_data_formatted = []
-                        import uuid
-                        from datetime import datetime
-                        
-                        for viz in graph_data_raw:
-                            nodes = viz.get("nodes", [])
-                            edges = viz.get("edges", [])
-                            metadata = viz.get("metadata", {})
-                            
-                            # 🚫 过滤空图谱：节点和关系同时为0时跳过
-                            if len(nodes) == 0 and len(edges) == 0:
-                                logger.info(f"🚫 跳过空图谱（0个节点，0条关系）")
-                                continue
-                            
-                            # 转换节点格式：将data字段扁平化为properties
-                            formatted_nodes = []
-                            for node in nodes:
-                                formatted_nodes.append({
-                                    "id": node.get("id", ""),
-                                    "label": node.get("label", ""),
-                                    "properties": {
-                                        "type": node.get("type", ""),
-                                        **(node.get("data", {}))
-                                    }
-                                })
-                            
-                            # 转换边格式：将type字段重命名为relation
-                            formatted_edges = []
-                            for edge in edges:
-                                formatted_edges.append({
-                                    "source": edge.get("source", ""),
-                                    "target": edge.get("target", ""),
-                                    "relation": edge.get("label", edge.get("type", "")),
-                                    "properties": {
-                                        "type": edge.get("type", "")
-                                    }
-                                })
-                            
-                            # 构建符合前端GraphMetadata接口的数据结构
-                            graph_data_formatted.append({
-                                "graph_id": str(uuid.uuid4()),
-                                "tool_name": "知识图谱检索",
-                                "query": "图谱检索结果",  # 这里可以从context获取原始查询
-                                "node_count": len(formatted_nodes),
-                                "edge_count": len(formatted_edges),
-                                "created_at": datetime.now().isoformat(),
-                                "nodes": formatted_nodes,
-                            "edges": formatted_edges
-                        })
-                    
-                        # 🚫 如果过滤后没有有效图谱，则不发送
-                        if not graph_data_formatted:
-                            logger.info(f"🚫 所有图谱均为空，不发送到前端")
-                        else:
-                            # 通过特殊标记发送图谱元数据
-                            graph_json = json.dumps(graph_data_formatted, ensure_ascii=False)
-                            yield f"__GRAPH_METADATA__{graph_json}__END__"
-                            logger.info(f"🎨 已发送 {len(graph_data_formatted)} 个图谱可视化数据到chat router")
-                        
-                        # 🗑️ 发送成功后，从Redis删除缓存
-                        deleted_count = await GraphVisualizationCache.delete_session_visualizations(redis, session_id)
-                        logger.info(f"🗑️ 已删除Redis中的图谱可视化缓存: session={session_id}, count={deleted_count}")
-                    
-                    # 清空会话标记
-                    self._pending_graph_sessions.discard(session_id)
-                    
-                except Exception as e:
-                    logger.error(f"❌ 从Redis提取图谱可视化数据失败: {e}", exc_info=True)
-            
             # 添加工具结果到消息列表
             for result in tool_results:
                 messages.append(result)
@@ -696,22 +616,7 @@ class UniversalStreamingManager:
         if hasattr(self, '_last_ref_marker') and session_id in self._last_ref_marker:
             del self._last_ref_marker[session_id]
         
-        # 🆕 【Redis方案】清理图谱可视化缓存（兜底清理，防止Redis缓存泄漏）
-        if hasattr(self, '_pending_graph_sessions') and session_id in self._pending_graph_sessions:
-            try:
-                from app.redis_client import get_redis
-                from app.utils.llm.graph_viz_cache import GraphVisualizationCache
-                
-                redis = await get_redis()
-                deleted_count = await GraphVisualizationCache.delete_session_visualizations(redis, session_id)
-                if deleted_count > 0:
-                    logger.warning(f"⚠️ 兜底清理：删除了 {deleted_count} 个未发送的图谱可视化缓存")
-                
-                self._pending_graph_sessions.discard(session_id)
-            except Exception as e:
-                logger.error(f"❌ 清理图谱可视化Redis缓存失败: {e}", exc_info=True)
-        
-        logger.info(f"🧹 工具调用流程结束，已清理会话 {session_id} 的所有引用和图谱数据缓存")
+        logger.info(f"🧹 工具调用流程结束，已清理会话 {session_id} 的所有引用数据缓存")
         
         # 🆕 输出工具调用统计（如果启用）
         if tool_config.enable_tool_stats and session_id in self._tool_stats:
@@ -1306,12 +1211,6 @@ class UniversalStreamingManager:
                                     self._pending_references = {}
                                 if session_id not in self._pending_references:
                                     self._pending_references[session_id] = {"rich": [], "lean": []}
-                                
-                                # 🆕 初始化图谱元数据存储
-                                if not hasattr(self, '_pending_graph_metadata'):
-                                    self._pending_graph_metadata = {}
-                                if session_id not in self._pending_graph_metadata:
-                                    self._pending_graph_metadata[session_id] = []
                                 
                                 # 构建引用数据（rich和lean格式）
                                 rich_refs = []

@@ -1089,69 +1089,9 @@ class KnowledgeBaseService:
             upload_time=doc_dict["created_at"],
             update_time=doc_dict["updated_at"],
             progress=progress,
-            progress_msg=progress_msg,
-            # 知识图谱构建状态
-            kg_status=doc_dict.get("kg_status", "not_built"),
-            kg_error_message=doc_dict.get("kg_error_message"),
-            kg_built_time=doc_dict.get("kg_built_time")
+            progress_msg=progress_msg
         )
     
-    async def update_document_kg_status(
-        self,
-        doc_id: str,
-        kg_status: str,
-        kg_error_message: Optional[str] = None,
-        kg_built_time: Optional[str] = None
-    ) -> bool:
-        """
-        更新文档的知识图谱构建状态
-        
-        Args:
-            doc_id: 文档ID
-            kg_status: 知识图谱状态 (not_built, building, success, failed)
-            kg_error_message: 错误信息（失败时）
-            kg_built_time: 构建成功时间
-            
-        Returns:
-            是否更新成功
-        """
-        async with self._semaphore:
-            try:
-                update_dict = {
-                    "kg_status": kg_status,
-                    "updated_at": datetime.utcnow().isoformat()
-                }
-                
-                if kg_error_message is not None:
-                    update_dict["kg_error_message"] = kg_error_message
-                if kg_built_time is not None:
-                    update_dict["kg_built_time"] = kg_built_time
-                
-                result = await self.doc_collection.update_one(
-                    {"_id": ObjectId(doc_id)},
-                    {"$set": update_dict}
-                )
-                
-                logger.info(
-                    f"✅ 更新文档知识图谱状态: doc_id={doc_id}, kg_status={kg_status}, "
-                    f"matched={result.matched_count}, modified={result.modified_count}"
-                )
-                
-                # 验证更新是否生效
-                if result.modified_count == 0:
-                    logger.warning(f"⚠️ MongoDB更新没有修改任何文档！doc_id={doc_id}")
-                    # 检查文档是否存在
-                    doc_check = await self.doc_collection.find_one({"_id": ObjectId(doc_id)})
-                    if doc_check:
-                        logger.info(f"📄 文档存在，当前kg_status={doc_check.get('kg_status', 'unknown')}")
-                    else:
-                        logger.error(f"❌ 文档不存在！doc_id={doc_id}")
-                
-                return result.modified_count > 0
-                
-            except Exception as e:
-                logger.error(f"更新文档知识图谱状态失败: {str(e)}")
-                raise RuntimeError(f"更新文档知识图谱状态失败: {str(e)}")
 
 
 # 依赖注入函数

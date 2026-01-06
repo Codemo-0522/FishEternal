@@ -802,14 +802,53 @@ async def websocket_endpoint(
                 if not user_message.strip() and len(images_base64) == 0:
                     logger.warning("收到空消息且无图片")
                     continue
-                
+
+                # 🆕 处理附加文件标签
+                message_for_llm = user_message  # 发送给LLM的消息（包含展开的文件内容）
+                message_for_storage = user_message  # 存储到数据库的消息（保留文件标签）
+
+                if '<attached_files>' in user_message and '</attached_files>' in user_message:
+                    logger.info("检测到附加文件标签，开始解析")
+                    import re
+
+                    # 提取 <attached_files> 标签内容
+                    files_match = re.search(r'<attached_files>(.*?)</attached_files>', user_message, re.DOTALL)
+                    if files_match:
+                        files_content = files_match.group(0)
+
+                        # 解析每个文件
+                        file_pattern = r'<file\s+index="(\d+)"\s+name="([^"]+)"\s+size="(\d+)"\s+type="([^"]+)">(.*?)</file>'
+                        files = re.findall(file_pattern, files_content, re.DOTALL)
+
+                        if files:
+                            logger.info(f"解析到 {len(files)} 个文件")
+
+                            # 构造发送给LLM的格式（XML + 代码块）
+                            llm_documents = ['<documents>']
+                            for index, name, size, file_type, content in files:
+                                llm_documents.append(f'<document index="{index}">')
+                                llm_documents.append(f'<source>{name}</source>')
+                                llm_documents.append(f'<document_content>')
+                                llm_documents.append(f'```{name}')
+                                llm_documents.append(content.strip())
+                                llm_documents.append('```')
+                                llm_documents.append('</document_content>')
+                                llm_documents.append('</document>')
+                            llm_documents.append('</documents>')
+
+                            # 替换消息中的文件标签为展开格式
+                            llm_format = '\n'.join(llm_documents)
+                            message_for_llm = user_message.replace(files_content, llm_format)
+
+                            logger.info(f"文件内容已展开为LLM格式")
+
                 # 准备用户消息文档，但暂不保存
                 message_id = f"{session_id}_{len(history)}"
                 base_time = datetime.utcnow()
                 user_time = base_time.isoformat() + 'Z'  # 转换为ISO字符串格式，与前端保持一致
                 user_message_doc = {
                     "role": "user",
-                    "content": user_message,  # 保存原始用户消息（不包含注入的引用文档）
+                    "content": message_for_storage,  # 保存原始消息（包含文件标签）
                     "timestamp": user_time,  # 使用ISO字符串格式，便于前后端匹配
                     "images": []  # 初始化图片字段
                 }
@@ -890,10 +929,10 @@ async def websocket_endpoint(
                         logger.info("📚 @知识库 提示词已注入到 system_prompt")
                     
                     # 🆕 将 @文档 内容注入到用户消息中
-                    final_user_message = user_message
+                    final_user_message = message_for_llm  # 使用展开后的消息
                     if user_message_addition:
                         # 将引用文档放在用户消息前面，用 XML 标签包裹
-                        final_user_message = f"{user_message_addition}\n\n{user_message}"
+                        final_user_message = f"{user_message_addition}\n\n{message_for_llm}"
                         logger.info("📄 @文档 内容已注入到用户消息")
                         logger.info(f"📄 最终用户消息长度: {len(final_user_message)}")
                     

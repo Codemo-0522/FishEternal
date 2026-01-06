@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Layout, Select, Switch, Input, Button, message, Collapse, Tooltip, Dropdown, Modal, InputNumber, Slider, Checkbox, Tag, Alert, theme as antdTheme, DatePicker, Form, Tabs, List, Avatar, Popconfirm, Spin } from 'antd';
+import { Layout, Select, Switch, Input, Button, message, Collapse, Tooltip, Dropdown, Modal, InputNumber, Slider, Checkbox, Tag, Alert, theme as antdTheme, DatePicker, Form, Tabs, Avatar, Popconfirm, Spin } from 'antd';
 import { Upload } from 'antd';
 import dayjs from 'dayjs';
 import ReactMarkdown from 'react-markdown';
@@ -526,7 +526,11 @@ const Chat: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [compressorModalVisible, setCompressorModalVisible] = useState(false);
   const [isViewingPendingImage, setIsViewingPendingImage] = useState(false);
-    const [isModelTyping, setIsModelTyping] = useState(false); // 模型正在输入状态
+
+  // 文档上传相关状态
+  const [selectedDocuments, setSelectedDocuments] = useState<File[]>([]);
+
+  const [isModelTyping, setIsModelTyping] = useState(false); // 模型正在输入状态
   const [typingText, setTypingText] = useState('正在输入中...'); // 🎯 动态输入提示文本
   // 设置模态框可见性
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -1012,6 +1016,57 @@ const Chat: React.FC = () => {
     setImagePreviews([]);
   };
 
+  // 文档处理函数
+  const handleDocumentSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const processedFiles: File[] = [];
+
+      // 支持的文档格式
+      const supportedExtensions = [
+        '.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.c', '.h', '.cs',
+        '.md', '.json', '.txt', '.yaml', '.yml', '.xml', '.html', '.css', '.scss',
+        '.doc', '.docx', '.pdf', '.go', '.rs', '.php', '.rb', '.swift', '.kt'
+      ];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+        // 检查文件格式
+        if (!supportedExtensions.includes(fileExtension)) {
+          message.error(`文件 ${file.name} 格式不支持，仅支持代码和文档文件`);
+          continue;
+        }
+
+        // 检查文件大小 (限制为5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          message.error(`文件 ${file.name} 大小不能超过5MB`);
+          continue;
+        }
+
+        processedFiles.push(file);
+      }
+
+      if (processedFiles.length > 0) {
+        setSelectedDocuments(prev => [...prev, ...processedFiles]);
+        message.success(`成功添加 ${processedFiles.length} 个文档`);
+      }
+    }
+
+    // 重置input，允许重复选择同一个文件
+    event.target.value = '';
+  };
+
+  const handleDocumentRemove = (index: number) => {
+    setSelectedDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentRemoveAll = () => {
+    setSelectedDocuments([]);
+  };
+
   const handleImageClick = (imageUrl: string, isPending: boolean = false) => {
     setSelectedImage(imageUrl);
     setImageModalVisible(true);
@@ -1058,6 +1113,43 @@ const Chat: React.FC = () => {
     setCompressorModalVisible(false);
     setImageModalVisible(false);
     message.success(`已压缩 ${compressedImages.length} 张图片`);
+  };
+
+  // 解析消息中的附加文件标签
+  const parseAttachedFiles = (content: string) => {
+    const attachedFilesRegex = /<attached_files>([\s\S]*?)<\/attached_files>/;
+    const match = content.match(attachedFilesRegex);
+
+    if (!match) {
+      return { hasFiles: false, files: [], textContent: content };
+    }
+
+    const filesContent = match[1];
+    const fileRegex = /<file\s+index="(\d+)"\s+name="([^"]+)"\s+size="(\d+)"\s+type="([^"]+)">([\s\S]*?)<\/file>/g;
+    const files: Array<{ index: string; name: string; size: string; type: string; content: string }> = [];
+
+    let fileMatch;
+    while ((fileMatch = fileRegex.exec(filesContent)) !== null) {
+      files.push({
+        index: fileMatch[1],
+        name: fileMatch[2],
+        size: fileMatch[3],
+        type: fileMatch[4],
+        content: fileMatch[5].trim()
+      });
+    }
+
+    // 移除文件标签，保留其他文本内容
+    const textContent = content.replace(attachedFilesRegex, '').trim();
+
+    return { hasFiles: true, files, textContent };
+  };
+
+  // 格式化文件大小
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   // 图片预览容器鼠标滚动事件处理
@@ -2980,9 +3072,10 @@ const Chat: React.FC = () => {
 
     console.log('[Chat] 当前消息内容:', effectiveMessage);
     console.log('[Chat] 当前会话:', currentSession);
+    console.log('[Chat] 选中的文档:', selectedDocuments);
 
-    if (!effectiveMessage.trim() && effectiveFiles.length === 0) {
-      console.log('[Chat] 消息为空且无图片，终止发送');
+    if (!effectiveMessage.trim() && effectiveFiles.length === 0 && selectedDocuments.length === 0) {
+      console.log('[Chat] 消息为空且无图片和文档，终止发送');
       return;
     }
 
@@ -3069,23 +3162,59 @@ const Chat: React.FC = () => {
         }
       }
 
-      // 添加用户消息到显示列表
+      // 🔥 如果有文档，先构造特殊标签包裹文件信息
+      if (selectedDocuments.length > 0) {
+        console.log('[Chat] 处理文档，共', selectedDocuments.length, '个文档');
+
+        try {
+          const fileTagsArray: string[] = ['<attached_files>'];
+
+          for (let i = 0; i < selectedDocuments.length; i++) {
+            const doc = selectedDocuments[i];
+            const content = await doc.text();
+            const fileExtension = doc.name.split('.').pop() || '';
+
+            // 构造文件标签，包含文件元数据和内容
+            fileTagsArray.push(
+              `<file index="${i + 1}" name="${doc.name}" size="${doc.size}" type="${fileExtension}">`,
+              content,
+              `</file>`
+            );
+          }
+
+          fileTagsArray.push('</attached_files>');
+
+          // 将文件标签插入到消息顶部
+          const filesTag = fileTagsArray.join('\n');
+          messageContent = `${filesTag}\n\n${messageContent}`;
+
+          console.log('[Chat] 文件标签已构造，最终消息长度:', messageContent.length);
+        } catch (error) {
+          console.error('[Chat] 读取文档失败:', error);
+          message.error('读取文档失败，请重试');
+          setIsProcessing(false);
+          setIsImageUploading(false);
+          return;
+        }
+      }
+
+      // 🔥 添加用户消息到显示列表（使用包含文件标签的messageContent）
       const userMessage: ChatMessage = {
         role: 'user',
-        content: effectiveMessage || (effectiveFiles.length > 0 ? `[${effectiveFiles.length}张图片]` : ''),
+        content: messageContent || (effectiveFiles.length > 0 ? `[${effectiveFiles.length}张图片]` : ''),
         timestamp: new Date().toISOString(),
         images: effectiveFiles.length > 0 ? effectivePreviews : undefined
       };
-      
+
       // 立即添加用户消息，确保头像和内容立即显示
       setMessages(prev => [...prev, userMessage]);
       // 重置消息数量更新标志
       setMessageCountUpdated(false);
-      
+
       // 用户发送消息后，启用自动滚动并重置用户滚动标志
       isUserScrollingRef.current = false;
       setShouldAutoScroll(true);
-      
+
       // 用户消息已添加，等待DOM更新后滚动到底部
       setTimeout(() => {
         const container = messageListRef.current;
@@ -3095,7 +3224,7 @@ const Chat: React.FC = () => {
         }
       }, 0);
 
-      // 发送消息
+      // 统一使用WebSocket发送消息
       const messageData: any = {
         message: messageContent,
         images: imagesBase64,
@@ -3103,28 +3232,29 @@ const Chat: React.FC = () => {
         model_settings: currentSession?.model_settings,
         enable_voice: enableVoice,
         enable_text_cleaning: enableTextCleaning,
-        text_cleaning_patterns: textCleaningPatterns, // 正则表达式（换行分隔）
-        preserve_quotes: preserveQuotes, // 是否保留引号内容
-        kb_settings: (currentSession as any)?.kb_settings, // 添加知识库配置
+        text_cleaning_patterns: textCleaningPatterns,
+        preserve_quotes: preserveQuotes,
+        kb_settings: (currentSession as any)?.kb_settings,
         referenced_docs: referencedDocs.length > 0 ? referencedDocs.map(doc => ({
           doc_id: doc.docId,
           filename: doc.filename
-        })) : undefined // 🆕 引用的文档列表
+        })) : undefined
       };
-      
-      // 安全日志：不打印包含API密钥的模型配置和消息数据
+
       const modelService = currentSession?.model_settings?.modelService || '未知';
       const modelName = currentSession?.model_settings?.modelName || '未知';
       console.log('[Chat] 发送消息 - 模型:', modelService, '/', modelName);
       console.log('[Chat] 语音开关状态:', enableVoice);
       console.log('[Chat] 是否包含图片:', imagesBase64.length > 0);
       console.log('[Chat] 图片数量:', imagesBase64.length);
+      console.log('[Chat] 是否包含文档:', selectedDocuments.length > 0);
       chatWSManager.send(messageData);
       console.log('[Chat] 消息已通过WebSocket发送');
 
       setCurrentMessage('');
       setSelectedImages([]);
       setImagePreviews([]);
+      setSelectedDocuments([]); // 清空文档列表
       // 注意：不自动清空引用文档，让用户自己决定何时删除
       setSentFlag(false); // 发送消息后重置发送标记
       
@@ -7009,8 +7139,54 @@ const Chat: React.FC = () => {
                               })}
                             </div>
                           )}
-                          
-                          <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+
+                          {/* 渲染文件附件 */}
+                          {(() => {
+                            const parsed = parseAttachedFiles(msg.content);
+                            return (
+                              <>
+                                {parsed.hasFiles && parsed.files.length > 0 && (
+                                  <div style={{ marginBottom: '12px' }}>
+                                    {parsed.files.map((file, fileIndex) => (
+                                      <div
+                                        key={fileIndex}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          padding: '8px 12px',
+                                          marginBottom: '8px',
+                                          background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                                          borderRadius: '6px',
+                                          border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                                          cursor: 'default'
+                                        }}
+                                      >
+                                        <FileTextOutlined style={{ fontSize: '20px', marginRight: '10px', color: '#1890ff' }} />
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <div style={{
+                                            fontWeight: 500,
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                          }}>
+                                            {file.name}
+                                          </div>
+                                          <div style={{
+                                            fontSize: '12px',
+                                            opacity: 0.6,
+                                            marginTop: '2px'
+                                          }}>
+                                            {formatFileSize(parseInt(file.size))} · {file.type.toUpperCase()}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <div style={{ whiteSpace: 'pre-wrap' }}>{parsed.textContent || msg.content}</div>
+                              </>
+                            );
+                          })()}
                         </div>
                         <div className={styles.messageButtons}>
                           <Button 
@@ -7501,11 +7677,26 @@ const Chat: React.FC = () => {
                   {referencedDocs.map((doc, index) => (
                     <span key={`${doc.docId}-${index}`} className={styles.referencedDocItem}>
                       @{doc.filename}
-                      <CloseOutlined 
+                      <CloseOutlined
                         className={styles.referencedDocClose}
                         onClick={() => {
                           setReferencedDocs(referencedDocs.filter((_, i) => i !== index));
                         }}
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* 上传文档列表 */}
+              {selectedDocuments.length > 0 && (
+                <div className={styles.referencedDocsContainer}>
+                  {selectedDocuments.map((doc, index) => (
+                    <span key={`doc-${index}`} className={styles.referencedDocItem}>
+                      @{doc.name}
+                      <CloseOutlined
+                        className={styles.referencedDocClose}
+                        onClick={() => handleDocumentRemove(index)}
                       />
                     </span>
                   ))}
@@ -7600,9 +7791,18 @@ const Chat: React.FC = () => {
                     id="image-upload"
                   />
                 )}
-                
 
-                
+                {/* 文档上传按钮 */}
+                <input
+                  type="file"
+                  accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.h,.cs,.md,.json,.txt,.yaml,.yml,.xml,.html,.css,.scss,.doc,.docx,.pdf,.go,.rs,.php,.rb,.swift,.kt"
+                  multiple
+                  onChange={handleDocumentSelect}
+                  style={{ display: 'none' }}
+                  id="document-upload"
+                />
+
+
                 {currentSessionSupportsImage && (
                   <Button
                     type="text"
@@ -7612,7 +7812,15 @@ const Chat: React.FC = () => {
                     loading={isImageUploading}
                   />
                 )}
-                
+
+                {/* 文档上传按钮 */}
+                <Button
+                  type="text"
+                  icon={<FileTextOutlined />}
+                  onClick={() => document.getElementById('document-upload')?.click()}
+                  title="上传文档"
+                />
+
                 {/* 语音输入按钮（智能 VAD） */}
                   <Button
                     type="text"
@@ -7625,8 +7833,8 @@ const Chat: React.FC = () => {
                     className={isRecording ? 'recording-button' : ''}
                   />
                 {sent_flag ? (
-                  <Button 
-                    type="primary" 
+                  <Button
+                    type="primary"
                     icon={<SendOutlined />}
                     onClick={() => sendMessage()}
                     loading={isProcessing}
@@ -9656,7 +9864,7 @@ const ManageGroupModalInline: React.FC<{
         
         try {
           // 调用上传头像API
-          const uploadResponse = await api.post(
+          await api.post(
             `/api/group-chat/groups/${group.group_id}/avatar`,
             { avatar_data: base64data },
             {
@@ -9730,13 +9938,15 @@ const ManageGroupModalInline: React.FC<{
             {/* 群组头像 */}
             <Form.Item label="群组头像">
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <Avatar 
-                  size={80} 
-                  src={group.avatar ? convertMinioUrlToHttp(group.avatar) : undefined}
-                  icon={!group.avatar && <TeamOutlined />}
-                  style={{ backgroundColor: '#1890ff', cursor: 'pointer' }}
-                  onClick={() => document.getElementById('group-avatar-upload')?.click()}
-                />
+                <Spin spinning={uploadingAvatar}>
+                  <Avatar 
+                    size={80} 
+                    src={group.avatar ? convertMinioUrlToHttp(group.avatar) : undefined}
+                    icon={!group.avatar && <TeamOutlined />}
+                    style={{ backgroundColor: '#1890ff', cursor: uploadingAvatar ? 'default' : 'pointer' }}
+                    onClick={() => !uploadingAvatar && document.getElementById('group-avatar-upload')?.click()}
+                  />
+                </Spin>
                 <div>
                   <input
                     type="file"

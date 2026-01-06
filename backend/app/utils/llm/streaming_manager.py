@@ -493,9 +493,12 @@ class UniversalStreamingManager:
                         # 🎯 流式完成（无工具调用）
                         logger.info("✅ 真流式完成，无工具调用")
                         
-                        # 🖼️ 保存图片
+                        # 🖼️ 保存用户上传的图片
                         await self._save_pending_images_after_tools(llm_service)
-                        
+
+                        # 🎨 转移AI生成的图片URL到llm_service
+                        await self._transfer_generated_images_to_llm_service(session_id, llm_service)
+
                         # 退出迭代循环（正常完成，不是达到上限）
                         iteration = max_iter  # 👈 使用全局配置
                         reached_limit = False  # 明确标记：这是正常完成
@@ -615,8 +618,10 @@ class UniversalStreamingManager:
             del self._sent_ref_ids[session_id]
         if hasattr(self, '_last_ref_marker') and session_id in self._last_ref_marker:
             del self._last_ref_marker[session_id]
-        
-        logger.info(f"🧹 工具调用流程结束，已清理会话 {session_id} 的所有引用数据缓存")
+        if hasattr(self, '_pending_generated_images') and session_id in self._pending_generated_images:
+            del self._pending_generated_images[session_id]
+
+        logger.info(f"🧹 工具调用流程结束，已清理会话 {session_id} 的所有缓存数据（引用、生成图片等）")
         
         # 🆕 输出工具调用统计（如果启用）
         if tool_config.enable_tool_stats and session_id in self._tool_stats:
@@ -810,6 +815,9 @@ class UniversalStreamingManager:
             return
         
         # 🚀 使用真流式
+        # 🐛 修复：将 session_id 添加到 kwargs 中，确保图片缓存数据完整
+        kwargs['session_id'] = session_id
+
         async for event in current_service._call_llm_with_tools_streaming(
             messages=messages,
             tools=tools,
@@ -836,15 +844,25 @@ class UniversalStreamingManager:
             if not hasattr(current_service, '_pending_images'):
                 logger.debug("工具调用模式：无缓存的图片数据")
                 return
-            
+
             pending = current_service._pending_images
             images_base64 = pending.get('images_base64')
             session_id = pending.get('session_id')
             message_id = pending.get('message_id')
             user_id = pending.get('user_id')
-            
+
+            # 🐛 调试：详细检查每个参数
+            logger.info(f"🖼️ [_save_pending_images_after_tools] 缓存数据检查:")
+            logger.info(f"  - images_base64存在: {images_base64 is not None}, 数量: {len(images_base64) if images_base64 else 0}")
+            logger.info(f"  - session_id: {session_id}")
+            logger.info(f"  - message_id: {message_id}")
+            logger.info(f"  - user_id: {user_id}")
+
             if not images_base64 or not session_id or not message_id:
                 logger.warning(f"⚠️ 缓存的图片数据不完整，跳过保存")
+                logger.warning(f"  - images_base64为空: {not images_base64}")
+                logger.warning(f"  - session_id为空: {not session_id}")
+                logger.warning(f"  - message_id为空: {not message_id}")
                 return
             
             logger.info(f"🖼️ 工具调用模式：开始保存 {len(images_base64)} 张缓存图片到MinIO...")
@@ -874,7 +892,49 @@ class UniversalStreamingManager:
                 
         except Exception as e:
             logger.error(f"❌ 工具调用模式：保存图片失败: {e}", exc_info=True)
-    
+
+    async def _transfer_generated_images_to_llm_service(self, session_id: str, llm_service: Any):
+        """
+        将AI生成的图片URL转移到llm_service.last_saved_images
+
+        在工具调用完成后调用，确保生成的图片URL能被chat.py保存到MongoDB
+        """
+        try:
+            # 检查是否有缓存的生成图片URL
+            if not hasattr(self, '_pending_generated_images') or session_id not in self._pending_generated_images:
+                logger.debug("无缓存的AI生成图片URL")
+                return
+
+            image_urls = self._pending_generated_images[session_id]
+            if not image_urls:
+                logger.debug("AI生成图片URL列表为空")
+                return
+
+            logger.info(f"🎨 开始转移 {len(image_urls)} 张AI生成的图片URL到 llm_service...")
+
+            # 获取或初始化 llm_service.last_saved_images
+            if not hasattr(llm_service, 'last_saved_images'):
+                llm_service.last_saved_images = []
+
+            # 合并AI生成的图片URL和用户上传的图片URL
+            # 用户上传的图片可能已经在 last_saved_images 中了
+            existing_images = llm_service.last_saved_images or []
+            combined_images = existing_images + image_urls
+
+            # 更新 llm_service.last_saved_images
+            llm_service.last_saved_images = combined_images
+
+            logger.info(f"✅ 成功转移AI生成图片URL到 llm_service: {len(image_urls)} 张新图片")
+            logger.info(f"📊 llm_service.last_saved_images 总数: {len(combined_images)} 张（用户上传: {len(existing_images)}, AI生成: {len(image_urls)}）")
+            logger.info(f"🖼️ AI生成图片URLs: {image_urls}")
+
+            # 清理缓存
+            del self._pending_generated_images[session_id]
+            logger.debug(f"🧹 已清理会话 {session_id} 的生成图片缓存")
+
+        except Exception as e:
+            logger.error(f"❌ 转移AI生成图片URL失败: {e}", exc_info=True)
+
     async def _deduplicate_knowledge_base_results(
         self,
         session_id: str,
@@ -1290,7 +1350,29 @@ class UniversalStreamingManager:
                             self._pending_graph_sessions = set()
                         self._pending_graph_sessions.add(session_id)
                         logger.info(f"🎨 图谱检索工具 [{tool_name}] 已执行，标记会话: {session_id}（可视化数据将从Redis提取）")
-                    
+
+                    # 🎨 特殊处理：如果是图片生成工具，缓存生成的图片URL
+                    if tool_name == "generate_image" and isinstance(result_str, str):
+                        try:
+                            result_data = json.loads(result_str)
+                            if result_data.get("success") and result_data.get("images"):
+                                # 初始化图片URL存储
+                                if not hasattr(self, '_pending_generated_images'):
+                                    self._pending_generated_images = {}
+                                if session_id not in self._pending_generated_images:
+                                    self._pending_generated_images[session_id] = []
+
+                                # 缓存生成的图片URL列表
+                                image_urls = result_data.get("images", [])
+                                self._pending_generated_images[session_id].extend(image_urls)
+
+                                logger.info(f"🎨 已缓存 {len(image_urls)} 张AI生成的图片URL（累计: {len(self._pending_generated_images[session_id])} 张）")
+                                logger.info(f"🖼️ 图片URLs: {image_urls}")
+                        except json.JSONDecodeError:
+                            logger.warning(f"⚠️ 无法解析图片生成工具结果为JSON: {result_str[:100]}")
+                        except Exception as e:
+                            logger.error(f"❌ 提取生成图片URL失败: {e}", exc_info=True)
+
                     # 🎯 发送工具成功状态
                     await self.send_tool_status(
                         session_id=session_id,

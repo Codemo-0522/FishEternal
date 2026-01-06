@@ -994,14 +994,18 @@ class UnifiedOpenAIService(ModelService, BaseModelService):
                 session_id = kwargs.get('session_id')
                 message_id = kwargs.get('message_id')
                 user_id = kwargs.get('user_id')
-                
+
+                # 🐛 调试：检查参数是否完整
+                logger.info(f"🖼️ [_call_llm_with_tools_streaming] 接收到的kwargs keys: {list(kwargs.keys())}")
+                logger.info(f"🖼️ [_call_llm_with_tools_streaming] session_id={session_id}, message_id={message_id}, user_id={user_id}")
+
                 self._pending_images = {
                     'images_base64': images_base64,
                     'session_id': session_id,
                     'message_id': message_id,
                     'user_id': user_id
                 }
-                logger.info(f"🖼️ 流式工具调用：已缓存 {len(images_base64)} 张图片数据")
+                logger.info(f"🖼️ 流式工具调用：已缓存 {len(images_base64)} 张图片数据（session_id={session_id}, message_id={message_id}, user_id={user_id}）")
             
             # 构建请求数据
             request_data = {

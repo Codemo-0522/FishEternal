@@ -1164,13 +1164,30 @@ async def websocket_endpoint(
                         # 保存用户消息和AI回复
                         # AI回复使用序列号确保在用户消息之后
                         assistant_time = (base_time + timedelta(seconds=1)).isoformat() + 'Z'  # 转换为ISO字符串格式
-                        
+
                         ai_message_doc = {
                             "role": "assistant",
                             "content": complete_response,
                             "timestamp": assistant_time,  # 使用ISO字符串格式，便于前后端匹配
                             "reference": final_lean_refs,  # 使用合并后的引用
                         }
+
+                        # 🎨 添加AI生成的图片到assistant消息
+                        # saved_images 可能包含：1) 用户上传的图片（保存到user消息） 2) AI生成的图片（保存到assistant消息）
+                        # 我们通过检查是否有用户上传图片来区分：如果没有用户上传图片，则saved_images全部是AI生成的
+                        if saved_images and len(saved_images) > 0:
+                            # 如果用户没有上传图片（images_base64为空），说明saved_images是AI生成的
+                            if not images_base64 or len(images_base64) == 0:
+                                ai_message_doc["images"] = saved_images
+                                logger.info(f"🎨 已将 {len(saved_images)} 张AI生成的图片添加到assistant消息")
+                            else:
+                                # 如果用户上传了图片，saved_images可能同时包含用户上传和AI生成的图片
+                                # 在这种情况下，我们需要从saved_images中分离出AI生成的图片
+                                # 假设前len(images_base64)个是用户上传的，剩余的是AI生成的
+                                if len(saved_images) > len(images_base64):
+                                    ai_generated_images = saved_images[len(images_base64):]
+                                    ai_message_doc["images"] = ai_generated_images
+                                    logger.info(f"🎨 已将 {len(ai_generated_images)} 张AI生成的图片添加到assistant消息（总共{len(saved_images)}张，其中{len(images_base64)}张是用户上传）")
                         # 一次性保存用户消息和AI回复，并更新消息数量
                         await db[settings.mongodb_db_name].chat_sessions.update_one(
                             {"_id": session_id},
@@ -1207,11 +1224,25 @@ async def websocket_endpoint(
                             "user_timestamp": user_time,  # 🔑 返回用户消息的时间戳，用于前端更新
                             "assistant_timestamp": assistant_time  # 🔑 返回AI消息的时间戳，确保前后端一致
                         }
-                        
-                        # 如果有保存的图片，添加到完成消息中
+
+                        # 🐛 修复：区分用户上传的图片和AI生成的图片
                         if saved_images and len(saved_images) > 0:
-                            done_message["saved_images"] = saved_images
-                            logger.info(f"✅ 在完成消息中包含图片信息: {saved_images}")
+                            if images_base64 and len(images_base64) > 0:
+                                # 场景1：用户上传了图片，saved_images前N个是用户上传，后面是AI生成
+                                user_uploaded_images = saved_images[:len(images_base64)]
+                                done_message["saved_images"] = user_uploaded_images
+
+                                # 如果还有AI生成的图片，单独标记
+                                if len(saved_images) > len(images_base64):
+                                    ai_generated_images = saved_images[len(images_base64):]
+                                    done_message["ai_generated_images"] = ai_generated_images
+                                    logger.info(f"✅ 完成消息: 用户上传{len(user_uploaded_images)}张，AI生成{len(ai_generated_images)}张")
+                                else:
+                                    logger.info(f"✅ 完成消息: 用户上传{len(user_uploaded_images)}张")
+                            else:
+                                # 场景2：用户没有上传图片，saved_images全部是AI生成的
+                                done_message["ai_generated_images"] = saved_images
+                                logger.info(f"✅ 完成消息: AI生成{len(saved_images)}张图片")
                         
                         await websocket.send_json(jsonable_encoder(done_message))
                     else:

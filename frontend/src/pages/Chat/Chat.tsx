@@ -2554,7 +2554,7 @@ const Chat: React.FC = () => {
                   }
                 }
                 
-                // 如果有保存的图片，更新用户消息
+                // 如果有保存的用户上传图片，更新用户消息
                 if (data.saved_images && data.saved_images.length > 0) {
                   for (let i = updatedMessages.length - 1; i >= 0; i--) {
                     if (updatedMessages[i].role === 'user') {
@@ -2563,7 +2563,18 @@ const Chat: React.FC = () => {
                     }
                   }
                 }
-                
+
+                // 🎨 如果有AI生成的图片，更新assistant消息
+                if (data.ai_generated_images && data.ai_generated_images.length > 0) {
+                  for (let i = updatedMessages.length - 1; i >= 0; i--) {
+                    if (updatedMessages[i].role === 'assistant') {
+                      updatedMessages[i] = { ...updatedMessages[i], images: data.ai_generated_images } as any;
+                      console.log('[Chat] 已将AI生成的图片添加到assistant消息:', data.ai_generated_images);
+                      break;
+                    }
+                  }
+                }
+
                 // 🔑 如果有 assistant_timestamp，更新最后一条 AI 消息的时间戳
                 if (data.assistant_timestamp) {
                   for (let i = updatedMessages.length - 1; i >= 0; i--) {

@@ -4835,3 +4835,117 @@
   background: rgba(24, 144, 255, 0.1);
   border-color: rgba(24, 144, 255, 0.3);
 }
+
+/* ==================== Markdown Table Styles ==================== */
+
+/* 表格容器样式 */
+.messageContent table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 12px 0;
+  display: table;
+  overflow-x: auto;
+  background: var(--bg-primary);
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+}
+
+/* 表格单元格基础样式 */
+.messageContent th,
+.messageContent td {
+  padding: 10px 14px;
+  text-align: left;
+  border: 1px solid #e8e8e8;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* 表头样式 */
+.messageContent thead {
+  background: var(--bg-secondary);
+}
+
+.messageContent th {
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-bottom: 2px solid #d9d9d9;
+}
+
+/* 表格行样式 */
+.messageContent tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.messageContent tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.messageContent tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+/* 深色主题下的表格样式 */
+[data-theme="dark"] .messageContent table {
+  background: var(--bg-primary);
+  border: 1px solid #434343;
+}
+
+[data-theme="dark"] .messageContent th,
+[data-theme="dark"] .messageContent td {
+  border: 1px solid #303030;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .messageContent thead {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .messageContent th {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid #434343;
+}
+
+[data-theme="dark"] .messageContent tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .messageContent tbody tr:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 移动端表格优化 */
+@media (max-width: 768px) {
+  .messageContent table {
+    font-size: 13px;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .messageContent th,
+  .messageContent td {
+    padding: 8px 10px;
+  }
+
+  /* 移动端表格滚动条样式 */
+  .messageContent table::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .messageContent table::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .messageContent table::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 2px;
+  }
+
+  .messageContent table::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+}

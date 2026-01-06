@@ -18,11 +18,11 @@ class ToolCallConfig:
     # ==================== 核心参数 ====================
     # 最大工具调用迭代次数
     max_iterations: int = 10
-    
+
     # 工具调用超时设置（秒）
-    tool_execution_timeout: int = 30  # 单个工具执行的超时时间
+    tool_execution_timeout: int = 600  # 单个工具执行的超时时间（10分钟，用于图片生成等耗时操作）
     llm_call_timeout: int = 180  # LLM调用（含工具思考）的超时时间
-    total_timeout: int = 300  # 整个工具调用流程的总超时时间
+    total_timeout: int = 900  # 整个工具调用流程的总超时时间（15分钟）
     
     # 并发控制
     max_concurrent_tools: int = 5

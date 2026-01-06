@@ -31,6 +31,7 @@
   --bg-modal: #ffffff;
   --bg-dropdown: #ffffff;
   --bg-tooltip: #ffffff;
+  --hover-bg: #fafafa;
   
   /* 文字颜色 */
   --text-primary: #262626;
@@ -136,6 +137,7 @@
   --bg-modal: #1f1f1f;
   --bg-dropdown: #1f1f1f;
   --bg-tooltip: #1f1f1f;
+  --hover-bg: #333333;
   
   /* 文字颜色 */
   --text-primary: #ffffff;

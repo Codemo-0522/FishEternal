@@ -552,9 +552,10 @@ const Chat: React.FC = () => {
 
   // 修改消息相关状态
   const [editMessageModalVisible, setEditMessageModalVisible] = useState(false);
-  const [messageToEdit, setMessageToEdit] = useState<{index: number, content: string, images?: string[]} | null>(null);
+  const [messageToEdit, setMessageToEdit] = useState<{index: number, content: string, images?: string[], files?: Array<{index: string; name: string; size: string; type: string; content: string}>} | null>(null);
   const [editedContent, setEditedContent] = useState('');
   const [editedImages, setEditedImages] = useState<string[]>([]);
+  const [editedFiles, setEditedFiles] = useState<Array<{index: string; name: string; size: string; type: string; content: string}>>([]);
 
   // 导出对话数据相关状态
   const [exportChatModalVisible, setExportChatModalVisible] = useState(false);
@@ -4809,10 +4810,36 @@ const Chat: React.FC = () => {
 
   // 修改消息函数
   const handleEditMessage = (index: number, content: string, images?: string[]) => {
-    setMessageToEdit({ index, content, images: images || [] });
-    setEditedContent(content);
+    // 解析消息内容，提取文件信息
+    const parsed = parseAttachedFiles(content);
+
+    setMessageToEdit({
+      index,
+      content,
+      images: images || [],
+      files: parsed.files
+    });
+
+    // 设置编辑内容（不包含文件标签，只有文本）
+    setEditedContent(parsed.textContent);
     setEditedImages(images || []);
+    setEditedFiles(parsed.files);
     setEditMessageModalVisible(true);
+  };
+
+  // 从编辑中删除文件
+  const handleRemoveFileFromEdit = (fileName: string, fileIndex: string) => {
+    Modal.confirm({
+      title: '确认删除文件',
+      content: `确定要删除文件 "${fileName}" 吗？删除后将无法恢复。`,
+      okText: '确定删除',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: () => {
+        setEditedFiles(prev => prev.filter(f => f.index !== fileIndex));
+        message.success('文件已删除');
+      }
+    });
   };
 
   const confirmEditMessage = async () => {
@@ -4822,11 +4849,29 @@ const Chat: React.FC = () => {
 
     try {
       const apiUrl = getFullUrl('/api/chat/sessions');
-      
+
+      // 🔥 重新构造消息内容（包含文件标签）
+      let finalContent = editedContent;
+      if (editedFiles.length > 0) {
+        const fileTagsArray: string[] = ['<attached_files>'];
+
+        for (const file of editedFiles) {
+          fileTagsArray.push(
+            `<file index="${file.index}" name="${file.name}" size="${file.size}" type="${file.type}">`,
+            file.content,
+            `</file>`
+          );
+        }
+
+        fileTagsArray.push('</attached_files>');
+        const filesTag = fileTagsArray.join('\n');
+        finalContent = `${filesTag}\n\n${editedContent}`;
+      }
+
       // 获取当前消息的时间戳用于精确定位
       const targetMsg = messages[messageToEdit.index];
       const targetTimestamp = targetMsg?.timestamp;
-      
+
       const response = await fetch(`${apiUrl}/${currentSession.session_id}/messages/${messageToEdit.index}`, {
         method: 'PUT',
         headers: {
@@ -4835,7 +4880,7 @@ const Chat: React.FC = () => {
         },
         body: JSON.stringify({
           timestamp: targetTimestamp,  // 添加时间戳用于精确定位
-          content: editedContent,
+          content: finalContent,  // 🔥 使用包含文件标签的完整内容
           images: editedImages,
           images_to_delete: (messageToEdit.images || []).filter(img => !editedImages.includes(img))
         })
@@ -4843,14 +4888,14 @@ const Chat: React.FC = () => {
 
       if (response.ok) {
         // 更新本地消息状态
-        setMessages(prevMessages => 
-          prevMessages.map((msg, i) => 
-            i === messageToEdit.index 
-              ? { ...msg, content: editedContent, images: editedImages }
+        setMessages(prevMessages =>
+          prevMessages.map((msg, i) =>
+            i === messageToEdit.index
+              ? { ...msg, content: finalContent, images: editedImages }  // 🔥 使用完整内容
               : msg
           )
         );
-        
+
         message.success('消息已修改');
       } else {
         const errorData = await response.json();
@@ -9114,6 +9159,7 @@ const Chat: React.FC = () => {
           setMessageToEdit(null);
           setEditedContent('');
           setEditedImages([]);
+          setEditedFiles([]);
         }}
         okText="确定修改"
         cancelText="取消"
@@ -9133,6 +9179,7 @@ const Chat: React.FC = () => {
               setMessageToEdit(null);
               setEditedContent('');
               setEditedImages([]);
+              setEditedFiles([]);
             }}
           >
             取消
@@ -9223,6 +9270,61 @@ const Chat: React.FC = () => {
             </div>
             <p style={{ color: '#666', fontSize: '12px', marginTop: '8px' }}>
               点击图片右上角的 × 可以删除图片
+            </p>
+          </div>
+        )}
+
+        {/* 附加文件列表 */}
+        {editedFiles.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              附加文件：
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {editedFiles.map((file) => (
+                <div
+                  key={file.index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                    borderRadius: '8px',
+                    border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                  }}
+                >
+                  <FileTextOutlined style={{ fontSize: '24px', marginRight: '12px', color: '#1890ff' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontWeight: 500,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      marginBottom: '4px'
+                    }}>
+                      {file.name}
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      opacity: 0.6
+                    }}>
+                      {formatFileSize(parseInt(file.size))} · {file.type.toUpperCase()}
+                    </div>
+                  </div>
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleRemoveFileFromEdit(file.name, file.index)}
+                    style={{ marginLeft: '8px' }}
+                  >
+                    删除
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <p style={{ color: '#666', fontSize: '12px', marginTop: '8px' }}>
+              删除文件可以清理大型文件的上下文，节省token消耗
             </p>
           </div>
         )}

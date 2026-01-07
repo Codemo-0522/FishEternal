@@ -63,7 +63,7 @@ if __name__ == "__main__":
 		uvicorn_kwargs.update({
 			"log_level": "critical",
 			"access_log": False,
-			"reload": False,
+			# "reload": False,
 		})
 
 	# 启动FastAPI应用

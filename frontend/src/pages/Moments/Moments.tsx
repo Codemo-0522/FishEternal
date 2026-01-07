@@ -45,6 +45,7 @@ import {
   type LikeUser,
 } from '../../services/moments';
 import { useAuthStore } from '../../stores/authStore';
+import { convertMinioUrlToHttp } from '../../utils/url';
 import ThemeToggle from '../../components/ThemeToggle';
 import styles from './Moments.module.css';
 
@@ -424,7 +425,7 @@ const Moments: React.FC = () => {
               {moment.images.map((img, idx) => (
                 <Image
                   key={idx}
-                  src={img}
+                  src={convertMinioUrlToHttp(img)}
                   alt={`图片${idx + 1}`}
                   style={{
                     width: moment.images!.length === 1 ? 200 : 100,

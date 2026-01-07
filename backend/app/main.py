@@ -282,16 +282,6 @@ async def startup_event():
         except Exception as e:
             logger.error(f"⚠️ MCP 工具系统初始化失败: {e}", exc_info=True)
         
-        # 🎨 初始化资源管理器（图片生成等）
-        try:
-            from .services.resource_manager import get_resource_manager
-            
-            logger.info("🎨 正在初始化资源管理器...")
-            await get_resource_manager()
-            logger.info("✅ 资源管理器初始化完成")
-        except Exception as e:
-            logger.error(f"⚠️ 资源管理器初始化失败（不影响服务）: {e}", exc_info=True)
-        
         # 📝 初始化并启动朋友圈发布器
         try:
             from .services.moment_publisher import get_moment_publisher
@@ -310,7 +300,7 @@ async def startup_event():
     
     init_time = time.time() - start_time
     print(f"🚀 应用核心服务启动完成，耗时: {init_time:.2f}秒")
-    print(f"⏳ 后台加载中: ChromaDB、Embedding 模型、MCP 工具、资源管理器、朋友圈发布器...")
+    print(f"⏳ 后台加载中: ChromaDB、Embedding 模型、MCP 工具、朋友圈发布器...")
     
     # 静默模式下，仅输出一条"后端启动成功"到真实stdout
     _silence = (

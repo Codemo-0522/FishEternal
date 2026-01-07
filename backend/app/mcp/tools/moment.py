@@ -42,11 +42,31 @@ class ScheduleMomentTool(BaseTool):
                     },
                     "need_image": {
                         "type": "boolean",
-                        "description": "是否需要配图（需要 ComfyUI 服务支持）"
+                        "description": "是否需要配图。如果为 true，则必须提供 image_prompt。"
                     },
                     "image_prompt": {
                         "type": "string",
-                        "description": "配图描述（会调用 AI 绘图服务生成，如果服务可用）"
+                        "description": "配图的详细描述。当 need_image 为 true 时，此项必填。"
+                    },
+                    "image_size": {
+                        "type": "string",
+                        "description": "生成图片的尺寸，格式为 '宽*高'，例如 '1024*1024'。默认为 '1024*1024'。"
+                    },
+                    "negative_prompt": {
+                        "type": "string",
+                        "description": "反向提示词，描述不希望在图片中出现的内容。"
+                    },
+                    "n": {
+                        "type": "integer",
+                        "description": "生成图片的数量，默认为1。"
+                    },
+                    "steps": {
+                        "type": "integer",
+                        "description": "图片生成步数，影响质量，默认为50。"
+                    },
+                    "seed": {
+                        "type": "integer",
+                        "description": "随机种子，用于复现生成结果。"
                     },
                     "mood": {
                         "type": "string",
@@ -116,41 +136,22 @@ class ScheduleMomentTool(BaseTool):
                 "status": "pending",
                 "need_image": arguments.get("need_image", False),
                 "image_prompt": arguments.get("image_prompt"),
+                "image_size": arguments.get("image_size"),
+                "negative_prompt": arguments.get("negative_prompt"),
+                "n": arguments.get("n"),
+                "steps": arguments.get("steps"),
+                "seed": arguments.get("seed"),
                 "generated_images": [],
                 "mood": arguments.get("mood"),
                 "triggered_by": "ai_self"
             }
-            
-            # 3. 如果需要图片，尝试生成（异步，不阻塞）
-            if queue_item["need_image"] and queue_item["image_prompt"]:
-                try:
-                    from ...services.resource_manager import get_resource_manager
-                    
-                    resource_mgr = await get_resource_manager()
-                    
-                    # 检查是否有可用的图片生成器
-                    available_generators = resource_mgr.get_available_generators(
-                        resource_type="image"
-                    )
-                    
-                    if available_generators:
-                        logger.info(f"🎨 检测到可用的图片生成器，开始生成图片...")
-                        image_urls = await resource_mgr.generate_image(
-                            prompt=queue_item["image_prompt"],
-                            generator_name=available_generators[0]
-                        )
-                        
-                        if image_urls:
-                            queue_item["generated_images"] = image_urls
-                            logger.info(f"✅ 成功生成 {len(image_urls)} 张图片")
-                        else:
-                            logger.warning("⚠️ 图片生成失败，将发布纯文字朋友圈")
-                    else:
-                        logger.info("ℹ️ 暂无可用的图片生成服务，保存图片描述，等服务可用时再生成")
-                        
-                except Exception as e:
-                    logger.error(f"❌ 生成图片时出错: {e}")
-                    logger.info("将继续发布纯文字朋友圈")
+
+            # 3. 如果需要图片但未提供prompt，则提示错误
+            if queue_item["need_image"] and not queue_item["image_prompt"]:
+                return json.dumps({
+                    "success": False,
+                    "error": "需要配图时，必须提供 image_prompt 参数。"
+                }, ensure_ascii=False)
             
             # 4. 保存到会话文档的 moment_queue 字段
             await db.chat_sessions.update_one(
@@ -161,15 +162,14 @@ class ScheduleMomentTool(BaseTool):
             
             # 5. 返回结果给 AI
             delay_text = f"{delay_minutes}分钟后" if delay_minutes > 0 else "立即"
-            has_image_text = "（配图）" if queue_item["generated_images"] else ""
+            has_image_text = "（带配图）" if queue_item.get("need_image") else ""
             
             result = {
                 "success": True,
                 "queue_id": queue_item["_id"],
                 "message": f"朋友圈已安排，将在{delay_text}发布{has_image_text}",
                 "publish_at": publish_at.isoformat(),
-                "has_images": len(queue_item["generated_images"]) > 0,
-                "image_count": len(queue_item["generated_images"])
+                "will_generate_image": queue_item.get("need_image", False)
             }
             
             logger.info(f"📝 朋友圈工具执行成功: {result}")

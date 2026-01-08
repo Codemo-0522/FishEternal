@@ -1,5 +1,5 @@
 """
-FishChat MCP 模块
+FishEternal MCP 模块
 
 提供 Model Context Protocol 工具集成
 支持知识库检索、系统信息查询等功能

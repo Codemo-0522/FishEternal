@@ -15,7 +15,7 @@ class MinioClient:
         if not endpoint_raw:
             logger.warning("未检测到 MINIO_ENDPOINT，MinIO 客户端未启用。")
             self.client = None
-            self.bucket_name = (settings.minio_bucket_name or "").strip() or "fish-chat"
+            self.bucket_name = (settings.minio_bucket_name or "").strip() or "fish-eternal"
             return
         secure = endpoint_raw.startswith("https://")
         endpoint_clean = endpoint_raw.replace("http://", "").replace("https://", "")

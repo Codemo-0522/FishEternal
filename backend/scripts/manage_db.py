@@ -28,8 +28,8 @@ async def list_indexes():
     print("-" * 50)
     
     collections = [
-        ('users', client.fish_chat.users),
-        ('chat_sessions', client.fish_chat.chat_sessions)
+        ('users', client.fish_eternal.users),
+        ('chat_sessions', client.fish_eternal.chat_sessions)
     ]
     
     for collection_name, collection in collections:
@@ -54,8 +54,8 @@ async def drop_indexes():
         return
     
     collections = [
-        ('users', client.fish_chat.users),
-        ('chat_sessions', client.fish_chat.chat_sessions)
+        ('users', client.fish_eternal.users),
+        ('chat_sessions', client.fish_eternal.chat_sessions)
     ]
     
     for collection_name, collection in collections:
@@ -80,7 +80,7 @@ async def check_health():
         print("✅ 数据库连接正常")
         
         # 检查数据库统计
-        stats = await client.fish_chat.command("dbStats")
+        stats = await client.fish_eternal.command("dbStats")
         print(f"📊 数据库大小: {stats.get('dataSize', 0) / 1024 / 1024:.2f} MB")
         print(f"📦 集合数量: {stats.get('collections', 0)}")
         print(f"🗂️  索引数量: {stats.get('indexes', 0)}")
@@ -89,7 +89,7 @@ async def check_health():
         collections = ['users', 'chat_sessions']
         for collection_name in collections:
             try:
-                collection = client.fish_chat[collection_name]
+                collection = client.fish_eternal[collection_name]
                 count = await collection.count_documents({})
                 print(f"📁 {collection_name}: {count} 个文档")
             except Exception as e:

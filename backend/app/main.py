@@ -50,7 +50,7 @@ app.include_router(chunking.router, prefix="/api", tags=["智能分片"])  # 智
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Fish Chat API"}
+    return {"message": "Welcome to Fish Eternal API"}
 
 @app.get("/api/health/chromadb")
 async def chromadb_health():

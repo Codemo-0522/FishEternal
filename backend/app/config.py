@@ -65,7 +65,7 @@ class Settings(BaseSettings):
 	minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "")
 	minio_access_key: str = os.getenv("MINIO_ACCESS_KEY", "")
 	minio_secret_key: str = os.getenv("MINIO_SECRET_KEY", "")
-	minio_bucket_name: str = os.getenv("MINIO_BUCKET_NAME", "fish-chat")
+	minio_bucket_name: str = os.getenv("MINIO_BUCKET_NAME", "fish-eternal")
 
 	# TTS设置
 	tts_app_id: str = os.getenv("TTS_APP_ID", "")
@@ -131,7 +131,7 @@ class Settings(BaseSettings):
 	verification_code_length: int = int(os.getenv("VERIFICATION_CODE_LENGTH", "6"))
 	
 	# 应用配置
-	app_name: str = os.getenv("APP_NAME", "FishChat")
+	app_name: str = os.getenv("APP_NAME", "FishEternal")
 	app_url: str = os.getenv("APP_URL", "")
 	
 	# 流式响应长度限制配置（防止异常数据注入导致前端崩溃）

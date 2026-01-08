@@ -25,10 +25,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class FishChatMCPServer:
-    """FishChat MCP Server 包装器"""
+class FishEternalMCPServer:
+    """FishEternal MCP Server 包装器"""
     
-    def __init__(self, server_name: str = "fishchat-mcp"):
+    def __init__(self, server_name: str = "fisheternal-mcp"):
         self.app = Server(server_name)
         self.context_data = {}  # 存储上下文数据（由客户端传递）
         self._setup_handlers()
@@ -109,7 +109,7 @@ async def main():
     logger.info(f"📦 已注册 {len(registry)} 个工具")
     
     # 启动服务器
-    server = FishChatMCPServer()
+    server = FishEternalMCPServer()
     await server.run()
 
 

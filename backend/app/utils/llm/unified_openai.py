@@ -130,7 +130,7 @@ class UnifiedOpenAIService(ModelService, BaseModelService):
             "url_suffix": "",
             "api_key_override": None,
             "default_headers": {
-                "User-Agent": "fish-chat/1.0"
+                "User-Agent": "fish-eternal/1.0"
             },
             "supports_vision": True,  # 豆包支持多模态
             "save_images_to_minio": True,  # 豆包需要保存图片到 MinIO

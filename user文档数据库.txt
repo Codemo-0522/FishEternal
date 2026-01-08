@@ -7,7 +7,7 @@
   "full_name": "玖凝",
   "hashed_password": "sha256$100000$6a33d169c78cbe279e7fd57f0370c30f77cab532fe9ab511249928dfc5151b03$65b633a740b197dc13fa9b3c9018e237fd1b26bd5e13ca9bd537c7fdb8f76286",
   "disabled": false,
-  "avatar_url": "minio://fish-chat/users/68e3f064e309231253729e1c/user_profile/avatar/4c4709b3-840e-4296-b665-c2db2da6d682.jpg",
+  "avatar_url": "minio://fish-eternal/users/68e3f064e309231253729e1c/user_profile/avatar/4c4709b3-840e-4296-b665-c2db2da6d682.jpg",
   "birth_date": "2003-05-22",
   "gender": "男",
   "signature": "余生请多指教吖",

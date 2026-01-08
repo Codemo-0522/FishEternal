@@ -2,7 +2,7 @@
 知识库检索工具
 
 从会话关联的知识库中检索相关文档片段
-这是 FishChat 的核心 RAG 工具
+这是 FishEternal 的核心 RAG 工具
 """
 from typing import Dict, Any, List, Tuple, Optional
 import json

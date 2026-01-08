@@ -155,6 +155,8 @@ class GenerateImageTool(BaseTool):
 
         if context and context.extra:
             image_configs = context.extra.get("image_generation_configs")
+            # 调试日志: 打印原始的图片生成配置
+            logger.info(f"🔍 [GenerateImageTool.get_metadata] 原始图片配置: {json.dumps(image_configs, indent=2, ensure_ascii=False)}")
             default_provider = context.extra.get("default_image_provider")
 
         # 如果用户没有配置任何图片生成服务,不显示此工具
@@ -167,7 +169,15 @@ class GenerateImageTool(BaseTool):
         for provider_id, config in image_configs.items():
             provider_name = provider_id
             default_model = config.get("default_model", "未设置")
-            models = config.get("models", [])
+            
+            # 合并预设模型和自定义模型 (修复 custom_models 是 dict 列表的问题)
+            base_models = config.get("models", [])
+            custom_models_raw = config.get("custom_models", [])
+            custom_model_names = [
+                m.get("id") for m in custom_models_raw 
+                if isinstance(m, dict) and m.get("id")
+            ]
+            models = base_models + custom_model_names
 
             if models:
                 models_str = ", ".join(models)
@@ -215,8 +225,13 @@ class GenerateImageTool(BaseTool):
         # model参数的描述(包含所有可用模型)
         all_models = []
         for config in image_configs.values():
-            models = config.get("models", [])
-            all_models.extend(models)
+            base_models = config.get("models", [])
+            custom_models_raw = config.get("custom_models", [])
+            custom_model_names = [
+                m.get("id") for m in custom_models_raw 
+                if isinstance(m, dict) and m.get("id")
+            ]
+            all_models.extend(base_models + custom_model_names)
 
         if all_models:
             model_desc = f"模型名称。可选值: {', '.join(all_models)}。留空使用服务商的默认模型。不同模型适用于不同场景,请根据需求选择。"

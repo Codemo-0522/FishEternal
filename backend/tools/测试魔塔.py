@@ -104,8 +104,8 @@ if __name__ == "__main__":
     task_id = submit_generation_task(
         prompt=detailed_prompt,
         negative_prompt=negative_prompt,
-        size="1024*1024", 
-        n=1,
+        size="720*720", 
+        n=2,
         seed=seed,
         steps=50 # 使用更高的步数以获得更好细节
     )

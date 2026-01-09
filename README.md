@@ -83,14 +83,17 @@ npm run dev
 
 ## 🖼️ 项目截图
 
-| 角色对话 | 模型配置 |
-| :---: | :---: |
-| ![角色对话](temps/images/角色对话.JPG) | ![模型配置](temps/images/模型配置.JPG) |
+### 角色对话
+![角色对话](temps/images/角色对话.JPG)
 
-| 朋友圈 | 群聊 |
-| :---: | :---: |
-| ![朋友圈](temps/images/朋友圈.JPG) | ![群聊](temps/images/群聊.JPG) |
+### 模型配置
+![模型配置](temps/images/模型配置.JPG)
 
-| 语音对话 |
-| :---: |
-| ![语音对话](temps/images/语音对话.JPG) |
+### 朋友圈
+![朋友圈](temps/images/朋友圈.JPG)
+
+### 群聊
+![群聊](temps/images/群聊.JPG)
+
+### 语音对话
+![语音对话](temps/images/语音对话.JPG)
